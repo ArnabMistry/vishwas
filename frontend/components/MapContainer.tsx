@@ -46,6 +46,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   selectedGridId,
   flyToLocation,
 }) => {
+  const isRealMode = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
   const mapRef = useRef<MapRef | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{
     x: number;
@@ -298,11 +299,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 
           <div className="grid grid-cols-2 gap-x-3 gap-y-1 mt-1.5">
             <div>
-              <span className="text-slate-400">NCUM Precip:</span>{" "}
+              <span className="text-slate-400">{isRealMode ? "GFS Precip:" : "NCUM Precip:"}</span>{" "}
               <strong className="text-slate-100">{hoverInfo.properties.f_precip} mm</strong>
             </div>
             <div>
-              <span className="text-slate-400">Bust Prob:</span>{" "}
+              <span className="text-slate-400">{isRealMode ? "Bust Risk:" : "Bust Prob:"}</span>{" "}
               <strong className={hoverInfo.properties.bust_prob >= 0.7 ? "text-critical" : "text-amber-400"}>
                 {(hoverInfo.properties.bust_prob * 100).toFixed(0)}%
               </strong>
@@ -314,7 +315,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               </strong>
             </div>
             <div>
-              <span className="text-slate-400">CQR Bound:</span>{" "}
+              <span className="text-slate-400">{isRealMode ? "Conformal Bound:" : "CQR Bound:"}</span>{" "}
               <strong className="text-amber-300">{hoverInfo.properties.cqr_bounds}</strong>
             </div>
           </div>

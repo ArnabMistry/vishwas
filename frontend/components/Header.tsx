@@ -86,7 +86,9 @@ export const Header: React.FC<HeaderProps> = ({
                 )}
               </div>
               <p className="text-[11px] text-slate-400 font-sans tracking-tight">
-                Forecast Reliability Engine &bull; Conformalized Quantile Regression (CQR)
+                {isRealMode
+                  ? "Forecast Reliability Engine • Split Conformal Prediction"
+                  : "Forecast Reliability Engine • Conformalized Quantile Regression (CQR)"}
               </p>
             </div>
           </div>
@@ -115,7 +117,12 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div className="flex items-center gap-1.5 text-slate-400">
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-              <span>Coverage: <strong className="text-slate-200">80% CQR Bound</strong></span>
+              <span>
+                Coverage:{" "}
+                <strong className="text-slate-200">
+                  {isRealMode ? "80% Conformal Bound" : "80% CQR Bound"}
+                </strong>
+              </span>
             </div>
           </div>
         </div>

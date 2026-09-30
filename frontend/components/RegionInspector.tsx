@@ -26,6 +26,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
   leadTime,
 }) => {
   const [viewMode, setViewMode] = useState<"fss" | "analogs">("fss");
+  const isRealMode = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
 
   if (!properties) return null;
 
@@ -99,7 +100,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
       </div>
 
       <div className="flex-1 overflow-y-auto pr-1 mt-2.5 space-y-2.5 font-sans text-xs">
-        {/* Core Metric Banner: FCI & CQR Bounds */}
+        {/* Core Metric Banner: FCI & Conformal Bounds */}
         <div className={`p-3 rounded-sm border ${fciTier.bg}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
@@ -119,18 +120,23 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
             </span>
             <span className="font-mono text-slate-400 text-xs">/ 100</span>
             <span className="ml-auto font-mono text-xs text-slate-300">
-              Bust Prob: <strong className={isHighRisk ? "text-critical" : "text-slate-200"}>{(bustProb * 100).toFixed(0)}%</strong>
+              {isRealMode ? "Bust Risk: " : "Bust Prob: "}
+              <strong className={isHighRisk ? "text-critical" : "text-slate-200"}>
+                {(bustProb * 100).toFixed(0)}%
+              </strong>
             </span>
           </div>
 
-          {/* Conformal CQR Bounds */}
+          {/* Conformal Bounds */}
           <div className="mt-2 pt-2 border-t border-slate-700/40 font-mono text-[11px]">
             <div className="text-slate-400 flex items-center justify-between">
-              <span>80% CONFORMAL ERROR BOUND (CQR):</span>
+              <span>{isRealMode ? "80% CONFORMAL ERROR BOUND:" : "80% CONFORMAL ERROR BOUND (CQR):"}</span>
               <span className="text-amber-300 font-bold">{properties.cqr_bounds}</span>
             </div>
             <div className="mt-0.5 text-[10px] text-slate-400 leading-tight">
-              Coverage guarantee: deterministic NCUM ({properties.f_precip} mm) is expected to diverge by +{properties.cqr_lower}mm to +{properties.cqr_upper}mm.
+              {isRealMode
+                ? `Coverage under exchangeability: forecast GFS (${properties.f_precip} mm) is expected to diverge by +${properties.cqr_lower}mm to +${properties.cqr_upper}mm.`
+                : `Coverage guarantee: deterministic NCUM (${properties.f_precip} mm) is expected to diverge by +${properties.cqr_lower}mm to +${properties.cqr_upper}mm.`}
             </div>
           </div>
         </div>
@@ -138,14 +144,14 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
         {/* Deterministic Forecast vs Conformal Expectation */}
         <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
           <div className="p-2 bg-slate-950/70 border border-slate-800 rounded-sm">
-            <div className="text-slate-400 text-[10px]">NCUM RAW PRECIP</div>
+            <div className="text-slate-400 text-[10px]">{isRealMode ? "GFS FORECAST PRECIP" : "NCUM RAW PRECIP"}</div>
             <div className="text-sm font-bold text-slate-200 mt-0.5">{properties.f_precip} mm/day</div>
             <div className="text-[9px] text-slate-500 mt-0.5">Model output</div>
           </div>
           <div className="p-2 bg-slate-950/70 border border-slate-800 rounded-sm">
-            <div className="text-slate-400 text-[10px]">ENSEMBLE SPREAD (&sigma;)</div>
+            <div className="text-slate-400 text-[10px]">{isRealMode ? "UNCERTAINTY SPREAD" : "ENSEMBLE SPREAD (&sigma;)"}</div>
             <div className="text-sm font-bold text-primary mt-0.5">&plusmn;{properties.ensemble_spread} mm</div>
-            <div className="text-[9px] text-slate-500 mt-0.5">NEPS-G variance</div>
+            <div className="text-[9px] text-slate-500 mt-0.5">{isRealMode ? "Interval-width proxy" : "NEPS-G variance"}</div>
           </div>
         </div>
 
@@ -284,7 +290,11 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
               <span>OPERATIONAL DIRECTIVE FOR MOES FORECASTERS</span>
             </div>
             <p className="mt-1.5 text-slate-200 text-[11px] leading-relaxed">
-              Deterministic NCUM-G is under-resolving coastal convective intensification. Recommend applying scenario-based probabilistic early warnings for <strong>{properties.region_name}</strong> and flagging flash-flood risk for local disaster management authorities.
+              {isRealMode ? (
+                <>Deterministic GFS forecast is under-resolving coastal convective intensification. Recommend applying scenario-based probabilistic early warnings for <strong>{properties.region_name}</strong> and flagging flash-flood risk for local disaster management authorities.</>
+              ) : (
+                <>Deterministic NCUM-G is under-resolving coastal convective intensification. Recommend applying scenario-based probabilistic early warnings for <strong>{properties.region_name}</strong> and flagging flash-flood risk for local disaster management authorities.</>
+              )}
             </p>
           </div>
         )}
