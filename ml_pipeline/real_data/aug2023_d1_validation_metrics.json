@@ -1,0 +1,270 @@
+{
+  "dataset": {
+    "source_nwp": "NOAA Global Forecast System (GFS) 0.25\u00b0 Open Data",
+    "source_obs": "India Meteorological Department (IMD) 0.25\u00b0 Gridded Daily Rainfall",
+    "period": "August 2023 (August 2 to August 31, 2023)",
+    "cycle": "00:00 UTC initialization (+3h and +27h forecast lead difference)",
+    "domain": "Lat 8.0\u00b0\u201336.0\u00b0N, Lon 68.0\u00b0\u201398.0\u00b0E (Indian landmass)",
+    "active_land_cells": 4905,
+    "total_days": 30,
+    "total_samples": 147150,
+    "total_busts": 8030,
+    "overall_bust_prevalence_pct": 5.46
+  },
+  "split": {
+    "train": {
+      "window": "August 2, 2023 \u2013 August 21, 2023",
+      "days": 20,
+      "samples": 98100,
+      "bust_count": 5570,
+      "bust_prevalence_pct": 5.68
+    },
+    "calib": {
+      "window": "August 22, 2023 \u2013 August 26, 2023",
+      "days": 5,
+      "samples": 24525,
+      "bust_count": 1990,
+      "bust_prevalence_pct": 8.11
+    },
+    "test": {
+      "window": "August 27, 2023 \u2013 August 31, 2023",
+      "days": 5,
+      "samples": 24525,
+      "bust_count": 470,
+      "bust_prevalence_pct": 1.92
+    }
+  },
+  "bust_definition": {
+    "formula": "ABS(forecast - observation) > 25 mm AND (forecast > 10 mm OR observation > 10 mm)",
+    "error_threshold_mm": 25.0,
+    "rain_threshold_mm": 10.0,
+    "scientific_rationale": "Requires both severe absolute divergence (|F - O| > 25 mm) and meaningful convective or stratiform rainfall activity (> 10 mm) to filter trivial differences in dry regimes."
+  },
+  "model": {
+    "architecture": "XGBoost Regressor (hist tree method)",
+    "target": "error_abs = |f_apcp_24h - o_rain_24h| (continuous forecast absolute error)",
+    "features": [
+      "f_apcp_24h",
+      "f_cape",
+      "f_hgt_500",
+      "f_u_850",
+      "f_v_850",
+      "lat",
+      "lon"
+    ],
+    "hyperparameters": {
+      "n_estimators": 100,
+      "max_depth": 5,
+      "learning_rate": 0.1,
+      "random_state": 42,
+      "tree_method": "hist"
+    }
+  },
+  "regression_metrics": {
+    "baseline": {
+      "name": "Median Error Baseline (Train Set)",
+      "median_error_mm": 1.3297,
+      "mae": 3.0578,
+      "rmse": 8.4237
+    },
+    "overall_test": {
+      "mae": 2.67,
+      "rmse": 6.4008,
+      "mean_bias": 1.0402,
+      "median_absolute_error": 1.2004,
+      "max_absolute_error": 224.2881,
+      "mae_improvement_pct": 12.68,
+      "rmse_improvement_pct": 24.01
+    },
+    "bust_cases": {
+      "sample_count": 470,
+      "mae": 28.0739,
+      "rmse": 36.5709,
+      "mean_bias": -21.4622,
+      "median_absolute_error": 22.8532,
+      "max_absolute_error": 224.2881
+    },
+    "non_bust_cases": {
+      "sample_count": 24055,
+      "mae": 2.1737,
+      "rmse": 3.9546,
+      "mean_bias": 1.4799,
+      "median_absolute_error": 1.1608,
+      "max_absolute_error": 97.6593
+    }
+  },
+  "bust_metrics": {
+    "primary_decision_rule": {
+      "description": "Forecast-side predicted-error alert rule (pred_error > 25.0 mm & f_apcp_24h > 10.0 mm; operational approximation using available forecast rain)",
+      "metrics": {
+        "tp": 147,
+        "tn": 23950,
+        "fp": 105,
+        "fn": 323,
+        "precision": 0.5833,
+        "recall": 0.3128,
+        "f1_score": 0.4072,
+        "accuracy": 0.9825,
+        "specificity": 0.9956,
+        "balanced_accuracy": 0.6542,
+        "matthews_corrcoef": 0.4193
+      }
+    },
+    "operational_alert_rule": {
+      "description": "Documented operational high-risk alert threshold (bust_risk_score >= 0.70)",
+      "metrics": {
+        "tp": 175,
+        "tn": 23789,
+        "fp": 266,
+        "fn": 295,
+        "precision": 0.3968,
+        "recall": 0.3723,
+        "f1_score": 0.3842,
+        "accuracy": 0.9771,
+        "specificity": 0.9889,
+        "balanced_accuracy": 0.6806,
+        "matthews_corrcoef": 0.3727
+      }
+    },
+    "conformal_upper_bound_rule": {
+      "description": "Diagnostic 80% conformal prediction interval upper bound exceeding 25 mm (cqr_upper > 25.0 mm)",
+      "metrics": {
+        "tp": 179,
+        "tn": 23780,
+        "fp": 275,
+        "fn": 291,
+        "precision": 0.3943,
+        "recall": 0.3809,
+        "f1_score": 0.3874,
+        "accuracy": 0.9769,
+        "specificity": 0.9886,
+        "balanced_accuracy": 0.6847,
+        "matthews_corrcoef": 0.3757
+      }
+    },
+    "interpretation_note": "The underlying XGBoost model is trained as a continuous error regressor, not a binary classifier. The derived bust_risk_score is a model-based risk indicator in [0, 1] and is NOT a calibrated probability. Rule A evaluates the direct threshold condition on continuous error predictions, while Rule B evaluates the documented operational alert threshold used in the frontend and backend."
+  },
+  "rainfall_stratification": {
+    "0\u201310 mm": {
+      "sample_count": 22734,
+      "pct_of_test_set": 92.7,
+      "mae": 1.7698,
+      "rmse": 2.7556,
+      "mean_bias": 1.4264
+    },
+    "10\u201325 mm": {
+      "sample_count": 999,
+      "pct_of_test_set": 4.07,
+      "mae": 7.256,
+      "rmse": 8.5222,
+      "mean_bias": 0.1967
+    },
+    "25\u201350 mm": {
+      "sample_count": 575,
+      "pct_of_test_set": 2.34,
+      "mae": 14.7624,
+      "rmse": 17.2235,
+      "mean_bias": -5.6821
+    },
+    "50\u2013100 mm": {
+      "sample_count": 174,
+      "pct_of_test_set": 0.71,
+      "mae": 36.2978,
+      "rmse": 39.8036,
+      "mean_bias": -9.5398
+    },
+    ">100 mm": {
+      "sample_count": 43,
+      "pct_of_test_set": 0.18,
+      "mae": 74.2989,
+      "rmse": 85.3665,
+      "mean_bias": -50.8454
+    }
+  },
+  "conformal_metrics": {
+    "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+    "nominal_coverage_pct": 80.0,
+    "empirical_coverage_pct": 90.99,
+    "mean_interval_width": 8.722,
+    "median_interval_width": 8.2566,
+    "bust_cases_diagnostic": {
+      "sample_count": 470,
+      "empirical_coverage_pct": 8.3,
+      "mean_interval_width": 11.5997,
+      "median_interval_width": 11.861,
+      "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+    },
+    "non_bust_cases_diagnostic": {
+      "sample_count": 24055,
+      "empirical_coverage_pct": 92.6,
+      "mean_interval_width": 8.6658,
+      "median_interval_width": 8.1815,
+      "diagnostic_note": "Diagnostic subgroup calculation only."
+    }
+  },
+  "error_distribution": {
+    "model_absolute_error_quantiles": {
+      "P10": 0.1318,
+      "P25": 0.3783,
+      "P50": 1.2004,
+      "P75": 2.9654,
+      "P90": 5.5662,
+      "P95": 8.7343,
+      "P99": 24.6977
+    },
+    "model_signed_residual_quantiles": {
+      "P10": -0.3579,
+      "P25": 0.1445,
+      "P50": 0.8802,
+      "P75": 2.3708,
+      "P90": 4.5631,
+      "P95": 6.2332,
+      "P99": 13.4711
+    },
+    "nwp_absolute_error_quantiles": {
+      "P10": 0.0,
+      "P25": 0.0,
+      "P50": 0.4772,
+      "P75": 2.75,
+      "P90": 7.5433,
+      "P95": 12.7909,
+      "P99": 36.8658
+    },
+    "nwp_signed_error_quantiles": {
+      "P10": -1.333,
+      "P25": 0.0,
+      "P50": 0.125,
+      "P75": 1.454,
+      "P90": 4.6875,
+      "P95": 7.8125,
+      "P99": 19.625
+    },
+    "forecast_rainfall_quantiles": {
+      "P10": 0.0,
+      "P25": 0.0,
+      "P50": 0.4375,
+      "P75": 2.75,
+      "P90": 7.875,
+      "P95": 13.6875,
+      "P99": 37.6275
+    },
+    "observation_rainfall_quantiles": {
+      "P10": 0.0,
+      "P25": 0.0,
+      "P50": 0.0,
+      "P75": 0.3078,
+      "P90": 6.3139,
+      "P95": 16.2219,
+      "P99": 46.7577
+    }
+  },
+  "limitations": [
+    "NOAA GFS 0.25\u00b0 is an open-data research proxy, not NCUM-G (NCMRWF operational model).",
+    "Validation covers August 2023 only, reflecting Indian Summer Monsoon active and break spells.",
+    "Evaluation evaluates 24-hour accumulation at D1 forecast horizon (+3h to +27h forecast).",
+    "Split Conformal Prediction finite-sample coverage guarantees rely on exchangeability; weather time series display spatio-temporal autocorrelation and synoptic regime transitions.",
+    "Derived bust_risk_score is an operational risk heuristic, NOT a calibrated posterior probability of bust.",
+    "TreeSHAP explanations represent local model feature attribution, not causal physical proof.",
+    "Bust prevalence in the test set (1.92%) was lower than training (6.02%) due to a synoptic monsoon break phase over central India during August 27\u201331, 2023."
+  ]
+}
