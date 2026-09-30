@@ -1,12 +1,13 @@
 # VISHWAS: Weather Intelligence & Spatiotemporal Hazard Warning Assessment System
 
-> **NCMRWF / MoES Operational Prototype**  
-> AI-Powered Forecast Bust Detection & Conformal Uncertainty Quantification for Numerical Weather Prediction (NCUM-G).
+> **MoES / NCMRWF Operational AI Prototype**  
+> AI-Powered Forecast Bust Detection & Conformal Uncertainty Quantification for Numerical Weather Prediction (NCUM-G).  
+> **Problem Statement 26079:** AI/ML-based Forecast Bust Detection and Reliability Assessment System for Numerical Weather Prediction Models (Ministry of Earth Sciences / National Centre for Medium Range Weather Forecasting).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Framework: Next.js 14](https://img.shields.io/badge/Frontend-Next.js%2014%20App%20Router-black)](https://nextjs.org/)
 [![Backend: FastAPI](https://img.shields.io/badge/Backend-FastAPI%20Python%203.11-009688)](https://fastapi.tiangolo.com/)
-[![Map Engine: MapLibre GL](https://img.shields.io/badge/Map-MapLibre%20GL%20JS-blue)](https://maplibre.org/)
+[![Map Engine: MapLibre GL](https://img.shields.io/badge/Map-MapLibre%20GL%20JS%20v6-blue)](https://maplibre.org/)
 [![ML: XGBoost + MAPIE + TreeSHAP](https://img.shields.io/badge/ML-CQR%20%2B%20TreeSHAP-orange)](https://mapie.readthedocs.io/)
 
 ---
@@ -15,7 +16,7 @@
 
 Operational Numerical Weather Prediction (NWP) models such as **NCUM-G** (National Centre for Medium Range Weather Forecasting Unified Model - Global, 12km resolution, 70 vertical levels) occasionally produce severe forecast failures known as **"forecast busts"**—episodes where deterministic precipitation diverges catastrophically from observed ground truth.
 
-**VISHWAS** is an operational AI co-pilot designed for NCMRWF/MoES duty meteorologists and disaster management authorities (NDRF/SDMA). Rather than blindly trusting NWP precipitation output, VISHWAS computes:
+**VISHWAS** is an operational AI co-pilot designed for NCMRWF/MoES duty meteorologists and disaster management authorities (NDRF/SDMA). Rather than blindly trusting raw NWP output, VISHWAS computes:
 
 1. **Conformalized Forecast Reliability Field (CFRF):** Continuous spatiotemporal reliability surfaces across India and surrounding ocean basins (0.0 to 1.0 bust probability) for forecast lead times Day 1 (24h) through Day 10 (240h).
 2. **Mathematically Guaranteed Uncertainty Bounds (CQR):** Conformalized Quantile Regression (via MAPIE) providing rigorous 80% coverage intervals (`+45mm to +78mm`) that are finite-sample distribution-free.
@@ -32,6 +33,7 @@ SIH/
 ├── backend/
 │   ├── data/                   # 10 precomputed GeoJSON grids (1x1 deg India basin)
 │   ├── main.py                 # FastAPI operational server & REST contracts
+│   ├── test_api.py             # FastAPI TestClient unit test suite
 │   └── requirements.txt        # Backend Python dependencies
 ├── ml_pipeline/
 │   ├── generate_mock_data.py   # Deterministic NCUM-G scenario synthesizer
@@ -54,136 +56,176 @@ SIH/
 │   │   └── maplibre-gl-shared.mjs # Shared Web Worker chunk
 │   └── package.json            # Next.js 14, Recharts, Lucide, MapLibre
 ├── docs/
-│   └── VISHWAS_RESEARCH_AND_PRODUCT_SPEC.md # Authoritative research specification
+│   ├── VISHWAS_RESEARCH_AND_PRODUCT_SPEC.md # Authoritative research specification
+│   ├── API_KEYS_AND_ENVIRONMENT.md          # Environment variable & credential inventory
+│   └── IMPLEMENTATION_STATUS_REPORT.md      # Detailed release readiness report
 ├── screenshots/                # Playwright E2E validation captures
 ├── Dockerfile.backend          # Production container for FastAPI & ML engine
 ├── Dockerfile.frontend         # Multi-stage production container for Next.js UI
 ├── docker-compose.yml          # Container orchestration configuration
-├── test_e2e.py                 # Automated Playwright test suite
+├── verify_backend.py           # Standalone automated backend endpoint verifier
+├── test_e2e.py                 # Automated Playwright E2E test suite
+├── .env.example                # Environment configuration template
 └── README.md
 ```
 
 ---
 
-## 3. Quick Start & Local Execution
+## 3. Environment Variables & Credentials
 
-### Prerequisites
-- Python 3.10+ (Python 3.11 recommended)
-- Node.js 18+ or 20+
-- Modern Web Browser (Chrome / Chromium / Edge / Firefox)
+> **Zero Credentials Required for Local Evaluation:**  
+> The VISHWAS local prototype requires **no API keys, tokens, or external credentials**. The MapLibre engine loads the public ESRI Dark Gray Canvas basemap directly over HTTPS. All forecast grids are precomputed and served locally.
 
-### Step 1: Backend Setup & Data Generation
+For custom port configurations or production environment templates, see:
+👉 **[docs/API_KEYS_AND_ENVIRONMENT.md](docs/API_KEYS_AND_ENVIRONMENT.md)**
 
 ```bash
-# Navigate to backend and install dependencies
+# Optional: copy configuration template
+cp .env.example .env.local
+```
+
+---
+
+## 4. Quick Start: Local Execution
+
+### Prerequisites
+- Python 3.10+ (Python 3.11 tested)
+- Node.js 18+ or 20+
+- Modern Web Browser (Chrome, Chromium, Edge, Firefox)
+
+### Step 1: Backend Setup
+```bash
+# 1. Install dependencies
 cd backend
 pip install -r requirements.txt
 
-# (Optional) Retrain or regenerate synthetic NCUM-G scenario data
-python ../ml_pipeline/generate_mock_data.py
-python ../ml_pipeline/train_pipeline.py
-
-# Start FastAPI server on port 8000
+# 2. Run backend server on port 8000
 python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
-Backend will be live at `http://127.0.0.1:8000`. You can test endpoints:
-- Swagger Docs: `http://127.0.0.1:8000/docs`
+- Swagger API Documentation: `http://127.0.0.1:8000/docs`
 - Health check: `http://127.0.0.1:8000/healthz`
-- Status telemetry: `http://127.0.0.1:8000/api/v1/status`
-- Forecast grid (Day 5): `http://127.0.0.1:8000/api/v1/forecast/grid?lead_time=5`
+- Operational Telemetry: `http://127.0.0.1:8000/api/v1/status`
 
 ### Step 2: Frontend Setup
-
 ```bash
 # In a new terminal, navigate to frontend
 cd frontend
 npm install --legacy-peer-deps
 
-# Run in production mode or development mode:
+# Run production build or development server
 npm run build
 npm run start -p 3000
-# or: npm run dev
+# or for hot-reloading dev mode:
+# npm run dev
 ```
 Open **`http://localhost:3000`** in your browser.
 
 ---
 
-## 4. Running with Docker Compose
+## 5. Machine Learning & Data Pipeline Execution
 
-To launch the entire synchronized stack with Docker:
+To regenerate the 10-day gridded forecast scenarios or retrain the XGBoost + MAPIE CQR conformal pipeline:
 
 ```bash
-# From workspace root
-docker compose up --build
+# 1. Synthesize 10-day gridded GeoJSON forecast scenario (lon 68-97, lat 8-35)
+python ml_pipeline/generate_mock_data.py
+
+# 2. Train XGBoost regressor, fit MAPIE CQR (80% coverage), and compute TreeSHAP
+python ml_pipeline/train_pipeline.py
 ```
-- **Frontend UI:** `http://localhost:3000`
-- **Backend API:** `http://localhost:8000`
-
----
-
-## 5. Live Demo Script (3.5-Minute Hackathon Walkthrough)
-
-Follow this exact walkthrough to demonstrate VISHWAS to jury members and evaluators:
-
-### 1. Synoptic Baseline (0:00 - 0:45)
-- Open `http://localhost:3000`.
-- Point out the top mission bar: **NCMRWF / MoES** agency context, active model cycle (`NCUM-G 12km 70L, 00Z Cycle`), live synchronized **UTC and IST clocks**, and the **Coverage: 80% CQR Bound** indicator.
-- Note the **Operations Overview** panel on the left: Network Mean FCI is healthy (~67.3/100, Synoptic Baseline), and 72% of grid cells exhibit nominal forecast error behavior.
-- Show the **Confidence DNA Barcode** for the monitored zones, demonstrating 10-day stability across early lead times.
-
-### 2. Timeline Scrubbing to Day 5 (0:45 - 1:30)
-- In the bottom timeline HUD, click the **Play** button or click directly on the glowing **D+5 (CRITICAL)** tick.
-- The map transitions to the 120-hour horizon. The banner turns red: **DEMO HOTSPOT: ODISHA BUST EPISODE**.
-- Notice the **CFRF Heatmap**: A severe forecast bust zone emerges over the Bay of Bengal and coastal Odisha, glowing in vibrant crimson (`bust_prob > 0.85`).
-- The Left Panel updates dynamically: Mean Network FCI drops, and the Odisha Coastal Plain card reflects a 94% bust probability.
-
-### 3. Region Inspector & Mathematical Guarantees (1:30 - 2:30)
-- Click on the **Odisha Coastal Plain & Offshore** alert card (or click directly on grid cell `[20.0°N, 85.0°E]` on the map).
-- The map smoothly glides to the Bay of Bengal / Odisha coast with a blue border highlighting the inspected 1x1 degree cell.
-- The **Region Inspector** opens on the right:
-  - **FCI Gauge:** Drops to **11.6 / 100 (Severe Forecast Bust)**.
-  - **80% CQR Error Bound:** Mathematically proven conformal prediction interval: deterministic NCUM precipitation is **48.5 mm/day**, but actual rainfall will diverge by **+49.1mm to +93.9mm**.
-  - **Physical Bust Attribution (TreeSHAP):** Shows translated meteorological drivers:
-    1. *Anomalous CAPE exceeding convective limits (> 3800 J/kg)*
-    2. *Extreme ensemble divergence indicating unpredictable synoptic flow*
-    3. *Rapidly deepening upper-level trough with intense diabatic feedback*
-  - **Spatial Verification (FSS Decay):** Demonstrates that spatial predictability drops below the operational $FSS = 0.5$ limit at **Day 4**, meaning deterministic details on Day 5 are physically unreliable.
-
-### 4. Historical Analogs & Telemetry Health (2:30 - 3:30)
-- In the inspector, toggle the **HISTORICAL ANALOGS** tab.
-- Review matched historical low-pressure events (e.g. *2020 Bay of Bengal Monsoon Low - 91% similarity, +64mm bust error*).
-- Click the **STATUS: OPERATIONAL** telemetry pill in the top header.
-- The modal reveals the complete technical specification: XGBoost regressor, MAPIE Conformal Quantile Regression with 80% empirical coverage, TreeSHAP explainer, and automated data ingestion health checks.
+Validation checkpoints and empirical coverage intervals are saved to `ml_pipeline/ml_validation.json`.
 
 ---
 
 ## 6. Verification & Automated Testing
 
-VISHWAS includes an automated end-to-end testing suite powered by Playwright:
+VISHWAS includes three dedicated automated test suites:
 
+### 1. Backend Route Unit Tests (Pytest + FastAPI TestClient)
 ```bash
-# Run headless browser E2E test suite
-python test_e2e.py
+python -m pytest backend/test_api.py -v
+```
+*Validates `/healthz`, `/api/v1/status`, grid queries, point inspection, TreeSHAP explanation, and alerts.*
+
+### 2. Standalone Backend Live Endpoint Verification
+```bash
+python verify_backend.py
+```
+*Runs live HTTP requests against all running backend endpoints and confirms response schemas.*
+
+### 3. Frontend TypeScript & Linting
+```bash
+cd frontend
+npm run lint
+npx tsc --noEmit
 ```
 
-The test validates:
-- [x] Header branding, agency badges, model run cycle, and UTC/IST clocks.
-- [x] Operations Overview metrics, cell error distributions, and Tufte Confidence DNA barcodes.
-- [x] Timeline scrubbing from D+1 to D+10 and Day 5 hotspot detection.
-- [x] Map click and flyTo animations to the Odisha bust zone.
-- [x] CQR conformal prediction interval bounds calculation.
-- [x] Linguistic TreeSHAP physical attribution driver formatting.
-- [x] FSS spatial verification decay curve with 0.5 threshold line.
-- [x] Historical analog matching view.
-- [x] System telemetry status modal inspection.
-- [x] Zero browser console errors.
-
-Screenshots of the verified operational run are preserved in `screenshots/`.
+### 4. End-to-End User Journey Tests (Playwright)
+```bash
+# Ensure both backend (:8000) and frontend (:3000) are running
+python test_e2e.py
+```
+*Executes the complete 13-stage evaluator journey in headless Chromium, capturing full-resolution verification screenshots to `screenshots/`.*
 
 ---
 
-## 7. Authoritative Specifications
+## 7. Running with Docker Compose
 
-For complete scientific derivations, conformal coverage equations, NCUM-G assimilation physics, and product UX rationale, consult:
+To run the containerized application stack:
 
-👉 **[docs/VISHWAS_RESEARCH_AND_PRODUCT_SPEC.md](file:///c:/builds/SIH/docs/VISHWAS_RESEARCH_AND_PRODUCT_SPEC.md)**
+```bash
+docker compose up --build
+```
+- **Frontend Dashboard:** `http://localhost:3000`
+- **Backend API:** `http://localhost:8000`
+
+---
+
+## 8. Live Demo Script (3.5-Minute Evaluator Walkthrough)
+
+Follow this sequence to demonstrate VISHWAS to evaluators:
+
+### 1. Synoptic Baseline (0:00 - 0:45)
+- Open `http://localhost:3000`.
+- Highlight the **Mission Control Header**: NCMRWF / MoES agency badge, active assimilation cycle (`NCUM-G 12km 70L, 00Z Cycle`), live synchronized **UTC and IST clocks**, and the **Coverage: 80% CQR Bound** indicator.
+- Note the **Operations Overview** panel on the left: Network Mean FCI is nominal (~67.3/100, Synoptic Baseline), and 72% of grid cells exhibit nominal error behavior.
+- Point out the **Confidence DNA Barcode** for monitored zones, showing multi-day forecast stability.
+
+### 2. Timeline Scrubbing to Day 5 (0:45 - 1:30)
+- In the bottom timeline HUD, click the **Play** button or click directly on the glowing **D+5 (CRITICAL)** tick.
+- The map transitions to the 120-hour horizon. The banner activates: **DEMO HOTSPOT: ODISHA BUST EPISODE**.
+- Point out the **CFRF Heatmap**: A severe forecast bust zone emerges over the Bay of Bengal and coastal Odisha, glowing in crimson (`bust_prob > 0.85`).
+- The Left Panel updates dynamically: Mean Network FCI drops, and the Odisha Coastal Plain card reflects a 94% bust probability.
+
+### 3. Region Inspector & Mathematical Guarantees (1:30 - 2:30)
+- Click on the **Odisha Coastal Plain & Offshore** alert card (or click directly on cell `[20.0°N, 85.0°E]`).
+- The map glides to the Odisha coast with a cyan border highlighting the inspected 1x1 degree cell.
+- The **Region Inspector** opens on the right:
+  - **FCI Gauge:** Drops to **11.6 / 100 (Severe Forecast Bust)**.
+  - **80% CQR Error Bound:** Mathematically proven conformal interval: deterministic NCUM precipitation is **48.5 mm/day**, but actual rainfall will diverge by **+49.1mm to +93.9mm**.
+  - **Physical Bust Attribution (TreeSHAP):** Shows translated meteorological drivers:
+    1. *Anomalous CAPE exceeding convective limits (> 3800 J/kg)*
+    2. *Extreme ensemble divergence indicating unpredictable synoptic flow*
+    3. *Rapidly deepening upper-level trough with intense diabatic feedback*
+  - **Spatial Verification (FSS Decay):** Demonstrates that spatial predictability drops below the operational $FSS = 0.5$ limit at **Day 4**, proving deterministic guidance on Day 5 is physically unreliable.
+
+### 4. Historical Analogs & Telemetry Health (2:30 - 3:30)
+- In the inspector, toggle the **HISTORICAL ANALOGS** tab.
+- Review matched historical low-pressure events (e.g. *2020 Bay of Bengal Monsoon Low - 94% similarity, +52mm bust error*).
+- Click the **STATUS: OPERATIONAL** telemetry pill in the header to view the full pipeline specification.
+
+---
+
+## 9. Scientific Integrity & Prototype Honesty Disclosures
+
+In accordance with scientific and product honesty:
+- **Synthetic Demonstration Scenarios:** The 10-day gridded numerical data used in this prototype is synthetically generated via `ml_pipeline/generate_mock_data.py`. The meteorological relationships (CAPE thresholds, monsoon troughs, and ensemble divergence) emulate physical NWP characteristics but **do not represent live operational MoES/NCMRWF supercomputer data streams**.
+- **Stand-alone Operation:** External government supercomputing feeds (NCUM GRIB2 streams) and IMD Doppler Weather Radar feeds are simulated through the mock generator to guarantee 100% reliability, zero latency, and zero air-gapped network dependencies during evaluation.
+- **Conformal Guarantees:** The CQR prediction intervals are computed via MAPIE conformalized quantile regression; the mathematical 80% coverage guarantees apply rigorously under exchangeability of the calibration and test distributions.
+
+---
+
+## 10. Authoritative Research Specification
+
+For complete mathematical formulations, conformal coverage equations, and NCUM-G assimilation physics, see:  
+👉 **[docs/VISHWAS_RESEARCH_AND_PRODUCT_SPEC.md](docs/VISHWAS_RESEARCH_AND_PRODUCT_SPEC.md)**

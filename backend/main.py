@@ -8,24 +8,10 @@ from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
+from contextlib import asynccontextmanager
 import os
 import json
 import math
-
-app = FastAPI(
-    title="VISHWAS API - Forecast Reliability Engine",
-    description="Operational reliability monitoring and Conformalized Quantile Regression bust detection for NCMRWF NCUM-G forecasts.",
-    version="1.0.0"
-)
-
-# Enable CORS for localhost:3000 and any client origin
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
@@ -41,14 +27,31 @@ def get_grid_data(lead_time: int) -> Dict[str, Any]:
             GRIDS_CACHE[lead_time] = json.load(f)
     return GRIDS_CACHE[lead_time]
 
-# Preload grids
-@app.on_event("startup")
-def preload_data():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Preload grids on startup
     for lt in range(1, 11):
         try:
             get_grid_data(lt)
         except Exception as e:
             print(f"Warning: Failed to preload grid_{lt}.geojson: {e}")
+    yield
+
+app = FastAPI(
+    title="VISHWAS API - Forecast Reliability Engine",
+    description="Operational reliability monitoring and Conformalized Quantile Regression bust detection for NCMRWF NCUM-G forecasts.",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Enable CORS for localhost:3000 and any client origin
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Models
 class SystemStatus(BaseModel):
