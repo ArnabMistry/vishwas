@@ -56,6 +56,7 @@ Thumbs.db
 # Real Data Validation artifacts (raw NWP and IMD downloads)
 backend/data/real/raw/
 backend/data/real/processed/
+backend/data/real/features/august_2023_matrix.parquet
 !backend/data/real/raw/.gitkeep
 !backend/data/real/processed/.gitkeep
 !backend/data/real/features/.gitkeep
@@ -64,4 +65,5 @@ backend/data/real/processed/
 *.idx
 *.grib
 *.grib2
+
 
