@@ -126,6 +126,29 @@ def run_e2e_validation():
         dismiss_btn.click()
         time.sleep(0.5)
 
+        # 7. Full India CFRF Subcontinental Overview
+        print("\n[Step 8] Capturing Full Subcontinental India CFRF Map...")
+        # Close inspector if open
+        inspector_close = page.locator("button[title='Close Inspector']")
+        if inspector_close.is_visible():
+            inspector_close.click()
+            time.sleep(0.5)
+        # Collapse operations panel for full map canvas
+        collapse_btn = page.locator("button[title='Collapse Panel']")
+        if collapse_btn.is_visible():
+            collapse_btn.click()
+            time.sleep(0.5)
+
+        full_map_shot = os.path.join(screenshots_dir, "05_full_india_cfrf_map.png")
+        page.screenshot(path=full_map_shot)
+        print(f"  [PASS] Saved screenshot: {full_map_shot}")
+
+        # Expand panel back
+        expand_btn = page.locator("button[title='Expand Operations Overview']")
+        if expand_btn.is_visible():
+            expand_btn.click()
+            time.sleep(0.5)
+
         # Print all console warnings/errors
         print(f"\nCaptured {len(console_logs)} browser console events:")
         for log in console_logs:

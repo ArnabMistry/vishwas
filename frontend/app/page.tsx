@@ -212,6 +212,7 @@ export default function Home() {
           leadTime={leadTime}
           onLeadTimeChange={(newLead) => setLeadTime(newLead)}
           isLoading={isLoading}
+          isInspectorOpen={!!selectedRegion}
         />
       </main>
 

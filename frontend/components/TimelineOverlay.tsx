@@ -7,12 +7,14 @@ interface TimelineOverlayProps {
   leadTime: number;
   onLeadTimeChange: (newLeadTime: number) => void;
   isLoading: boolean;
+  isInspectorOpen?: boolean;
 }
 
 export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
   leadTime,
   onLeadTimeChange,
   isLoading,
+  isInspectorOpen = false,
 }) => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
@@ -35,22 +37,28 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
   };
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-[94%] max-w-4xl bg-slate-950/90 border border-slate-700/80 backdrop-blur-md rounded-sm p-3.5 shadow-2xl select-none">
+    <div
+      className={`absolute bottom-3 z-20 bg-slate-950/95 border border-slate-700/80 backdrop-blur-md rounded-sm p-2 shadow-2xl select-none transition-all duration-200 ${
+        isInspectorOpen
+          ? "left-[308px] right-[408px] max-w-2xl mx-auto"
+          : "left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-2xl"
+      }`}
+    >
       {/* Top row: Controls, Timeline indicators & Lead Time Banner */}
-      <div className="flex items-center justify-between gap-4 mb-2.5">
+      <div className="flex items-center justify-between gap-3 mb-1.5">
         {/* Playback Controls */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
             onClick={() => setIsPlaying(!isPlaying)}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-medium rounded-sm border transition-colors ${
+            className={`flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-mono font-medium rounded-sm border transition-colors ${
               isPlaying
                 ? "bg-primary text-slate-950 border-primary font-bold"
                 : "bg-slate-900 hover:bg-slate-800 text-slate-200 border-slate-700"
             }`}
             title={isPlaying ? "Pause Timeline Playback" : "Auto-advance forecast lead time"}
           >
-            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            <span>{isPlaying ? "PAUSE" : isLoading ? "SYNCING..." : "PLAY TIMELINE"}</span>
+            {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            <span>{isPlaying ? "PAUSE" : isLoading ? "SYNCING..." : "PLAY"}</span>
           </button>
 
           <button
@@ -59,7 +67,7 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
             className="p-1 rounded-sm bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-slate-900 border border-slate-700 text-slate-300"
             title="Previous Day"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-3.5 h-3.5" />
           </button>
 
           <button
@@ -68,43 +76,43 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
             className="p-1 rounded-sm bg-slate-900 hover:bg-slate-800 disabled:opacity-30 disabled:hover:bg-slate-900 border border-slate-700 text-slate-300"
             title="Next Day"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Center: Lead Time display with D+5 Highlight */}
-        <div className="flex items-center gap-2 font-mono text-xs">
+        <div className="flex items-center gap-2 font-mono text-[11px]">
           <span className="text-slate-400">FORECAST LEAD:</span>
-          <span className="text-sm font-bold text-white px-2 py-0.5 bg-slate-900 border border-slate-700 rounded-sm">
-            Day {leadTime} / 10
+          <span className="text-xs font-bold text-white px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded-sm">
+            Day {leadTime} / 10 ({leadTime * 24}h)
           </span>
           {leadTime === 5 && (
-            <span className="flex items-center gap-1 text-[11px] font-bold text-critical bg-critical/15 px-2 py-0.5 border border-critical/40 rounded-sm animate-pulse">
+            <span className="flex items-center gap-1 text-[10px] font-bold text-critical bg-critical/15 px-1.5 py-0.5 border border-critical/40 rounded-sm animate-pulse">
               <AlertTriangle className="w-3 h-3" />
-              DEMO HOTSPOT: ODISHA BUST EPISODE
+              ODISHA BUST
             </span>
           )}
         </div>
 
         {/* Right: Bivariate Legend Preview */}
-        <div className="hidden sm:flex items-center gap-3 text-[11px] font-mono">
+        <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono">
           <span className="text-slate-400 flex items-center gap-1">
-            <Layers className="w-3.5 h-3.5 text-primary" />
-            CFRF BUST PROB:
+            <Layers className="w-3 h-3 text-primary" />
+            CFRF BUST:
           </span>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 bg-[#0F172A] border border-slate-700" title="Stable (<0.3)" />
-            <span className="text-slate-400 text-[10px]">0.0</span>
-            <div className="w-3 h-3 bg-[#38BDF8]" title="Nominal (0.5)" />
-            <div className="w-3 h-3 bg-[#F59E0B]" title="Warning (0.75)" />
-            <div className="w-3 h-3 bg-[#E11D48]" title="Severe Bust (>0.85)" />
-            <span className="text-slate-400 text-[10px]">1.0</span>
+            <div className="w-2.5 h-2.5 bg-[#0F172A] border border-slate-700" title="Stable (<0.3)" />
+            <span className="text-slate-500 text-[9px]">0.0</span>
+            <div className="w-2.5 h-2.5 bg-[#38BDF8]" title="Nominal (0.5)" />
+            <div className="w-2.5 h-2.5 bg-[#F59E0B]" title="Warning (0.75)" />
+            <div className="w-2.5 h-2.5 bg-[#E11D48]" title="Severe (>0.85)" />
+            <span className="text-slate-500 text-[9px]">1.0</span>
           </div>
         </div>
       </div>
 
       {/* Scrubbing Range Slider */}
-      <div className="relative py-1">
+      <div className="relative py-0.5">
         <input
           type="range"
           min="1"
@@ -112,12 +120,12 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
           step="1"
           value={leadTime}
           onChange={(e) => onLeadTimeChange(parseInt(e.target.value, 10))}
-          className="w-full h-2 bg-slate-800 rounded-none appearance-none cursor-pointer border border-slate-700"
+          className="w-full h-1.5 bg-slate-800 rounded-none appearance-none cursor-pointer border border-slate-700"
         />
       </div>
 
       {/* Day Tick Badges (D+1 to D+10) */}
-      <div className="grid grid-cols-10 gap-1.5 mt-1">
+      <div className="grid grid-cols-10 gap-1 mt-1">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((day) => {
           const isActive = day === leadTime;
           const isOdishaBustDay = day === 5;
@@ -125,7 +133,7 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
             <button
               key={day}
               onClick={() => onLeadTimeChange(day)}
-              className={`py-1 px-0.5 text-center font-mono text-[11px] rounded-sm transition-all border ${
+              className={`py-0.5 px-0.5 text-center font-mono text-[10px] rounded-sm transition-all border ${
                 isActive
                   ? "bg-primary text-slate-950 border-primary font-bold shadow-md"
                   : isOdishaBustDay
@@ -134,7 +142,7 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
               }`}
             >
               <div className="leading-tight">D+{day}</div>
-              <div className="text-[9px] opacity-75 font-sans leading-none mt-0.5">
+              <div className="text-[8px] opacity-75 font-sans leading-none mt-0.5">
                 {isOdishaBustDay ? "CRITICAL" : `${day * 24}h`}
               </div>
             </button>

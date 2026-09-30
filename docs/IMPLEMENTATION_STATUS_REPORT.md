@@ -23,23 +23,26 @@ The repository has been taken from foundational scaffolding to a fully integrate
 1. **Mission Operations Header:**
    - Agency context (NCMRWF / MoES), active NWP model cycle (`NCUM-G 12km, 70L, 00Z Cycle`), live synchronized UTC and IST digital clocks, operational status badge, and coverage indicator (`80% CQR Bound`).
 
-2. **MapLibre GL JS Cartographic Engine:**
+2. **MapLibre GL JS Cartographic Engine & Geographic Context:**
    - Full-bleed interactive dark canvas basemap using ESRI World Dark Gray Canvas.
+   - **Enhanced Subcontinental Geography:** High-contrast India national coastline and international border vector layer (`/india_boundary.geojson`), dashed administrative state boundaries for all 36 Indian States and Union Territories (`/india_states.geojson`), and ESRI World Dark Gray Reference overlay for surrounding oceanic basins (Bay of Bengal, Arabian Sea, Indian Ocean), neighboring South Asian countries, and regional labels.
    - Conformalized Forecast Reliability Field (CFRF) polygon grid layer covering India and adjacent oceanic basins (840 cells, $1^\circ \times 1^\circ$ resolution, $68^\circ\text{E} - 97^\circ\text{E},\ 8^\circ\text{N} - 35^\circ\text{N}$).
-   - Bivariate color interpolation (deep navy $\rightarrow$ sky blue $\rightarrow$ amber $\rightarrow$ crimson red $\ge 0.85$ bust probability).
-   - Dynamic cell selection highlight, smooth easeTo/flyTo animations, and hover HUD tooltips with instant metric readouts.
+   - Bivariate color interpolation (deep navy $\rightarrow$ sky blue $\rightarrow$ amber $\rightarrow$ crimson red $\ge 0.85$ bust probability) with tuned 0.65 fill opacity for contrast against vector state lines.
+   - Dynamic cell selection highlight, smooth easeTo/flyTo animations, and viewport-clamped HUD hover tooltips with instant metric readouts.
 
-3. **Interactive 10-Day Scrubbing Timeline:**
+3. **Interactive 10-Day Scrubbing Timeline Dock:**
+   - Compact mission control dock positioned dynamically with guaranteed non-overlapping air gaps between side panels across all viewports (1280x800, 1366x768, 1440x900, 1600x900, 1920x1080).
    - Scrubbable range slider spanning D+1 (24h) through D+10 (240h).
    - Auto-play / pause timeline animation with forward/backward step controls.
    - Quick-select day tick buttons with glowing **D+5 CRITICAL** indicator for the primary demo scenario.
    - Inline bivariate CFRF legend and active lead-time horizon indicator.
 
 4. **Operations Overview Panel (Left HUD):**
+   - Compact 288px width docked on the left, with constrained max-height to eliminate overlap with the bottom dock.
    - Mean Network Forecast Confidence Indicator (FCI) gauge with synoptic baseline indicator.
    - Active high-risk bust hotspot counter.
    - Subcontinental grid error distribution histogram (broken down into $>85\%$ bust, $60-85\%$ elevated, $30-60\%$ moderate, and $<30\%$ nominal safe cells).
-   - Monitored Bust Zones list featuring Tufte-style 10-day **Confidence DNA barcodes** showing temporal stability trends at a glance.
+   - Monitored Bust Zones with dedicated internal scroll container featuring Tufte-style 10-day **Confidence DNA barcodes** showing temporal stability trends at a glance.
 
 5. **Region Inspector & Uncertainty Quantification (Right HUD):**
    - Coordinates, region naming, and FCI score gauge with severe bust badge.

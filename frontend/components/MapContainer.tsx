@@ -146,7 +146,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
           0.80, "#E11D48", // Rose severe bust
           1.0, "#9F1239",  // Deep magenta extreme bust
         ],
-        "fill-opacity": 0.72,
+        "fill-opacity": 0.65,
       },
     }),
     []
@@ -211,20 +211,85 @@ export const MapContainer: React.FC<MapContainerProps> = ({
       >
         <NavigationControl position="top-right" showCompass={false} />
 
+        {/* CFRF Scientific Reliability Grid */}
         {gridData && (
           <Source id="forecast-grid" type="geojson" data={gridData}>
             <Layer {...fillLayerStyle} />
             <Layer {...outlineLayerStyle} />
+          </Source>
+        )}
+
+        {/* Indian State Administrative Boundaries */}
+        <Source id="india-states-source" type="geojson" data="/india_states.geojson">
+          <Layer
+            id="india-states-borders"
+            type="line"
+            paint={{
+              "line-color": "#64748B",
+              "line-width": 0.85,
+              "line-opacity": 0.75,
+              "line-dasharray": [3, 2],
+            }}
+          />
+        </Source>
+
+        {/* India National Boundary & Coastline (High Contrast) */}
+        <Source id="india-boundary-source" type="geojson" data="/india_boundary.geojson">
+          <Layer
+            id="india-coast-glow"
+            type="line"
+            paint={{
+              "line-color": "#0284C7",
+              "line-width": 2.8,
+              "line-opacity": 0.45,
+            }}
+          />
+          <Layer
+            id="india-boundary-line"
+            type="line"
+            paint={{
+              "line-color": "#F1F5F9",
+              "line-width": 1.5,
+              "line-opacity": 0.95,
+            }}
+          />
+        </Source>
+
+        {/* ESRI Dark Gray Reference: Subordinate Geographic Labels & Surrounding Geography */}
+        <Source
+          id="esri-reference-source"
+          type="raster"
+          tiles={[
+            "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+          ]}
+          tileSize={256}
+        >
+          <Layer
+            id="esri-reference-layer"
+            type="raster"
+            paint={{
+              "raster-opacity": 0.85,
+            }}
+          />
+        </Source>
+
+        {/* Active Selection Highlight Layer */}
+        {gridData && (
+          <Source id="forecast-grid-highlight" type="geojson" data={gridData}>
             <Layer {...highlightLayerStyle} />
           </Source>
         )}
       </Map>
 
-      {/* Lightweight HUD Tooltip on Hover */}
+      {/* Lightweight HUD Tooltip on Hover with Boundary Clamping */}
       {hoverInfo && (
         <div
-          className="pointer-events-none absolute z-40 bg-slate-950/95 border border-slate-700/90 rounded-sm p-2 shadow-2xl backdrop-blur-md text-[11px] font-mono text-slate-200 transform -translate-x-1/2 -translate-y-full mb-3"
-          style={{ left: hoverInfo.x, top: hoverInfo.y }}
+          className="pointer-events-none absolute z-40 bg-slate-950/95 border border-slate-700/90 rounded-sm p-2 shadow-2xl backdrop-blur-md text-[11px] font-mono text-slate-200"
+          style={{
+            left: `${Math.min(Math.max(hoverInfo.x, 150), typeof window !== "undefined" ? window.innerWidth - 240 : 800)}px`,
+            top: `${hoverInfo.y < 140 ? hoverInfo.y + 24 : hoverInfo.y - 12}px`,
+            transform: hoverInfo.y < 140 ? "translate(-50%, 0)" : "translate(-50%, -100%)",
+          }}
         >
           <div className="flex items-center justify-between gap-3 text-slate-400 pb-1 border-b border-slate-800 text-[10px]">
             <span>[{Number(hoverInfo.properties.lat).toFixed(1)}&deg;N, {Number(hoverInfo.properties.lon).toFixed(1)}&deg;E]</span>

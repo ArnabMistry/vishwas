@@ -75,9 +75,9 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
   ];
 
   return (
-    <aside className="absolute top-14 right-0 bottom-0 w-[420px] max-w-[90vw] bg-slate-900/95 border-l border-slate-700/80 backdrop-blur-md p-4 flex flex-col z-20 shadow-2xl overflow-y-auto select-none">
+    <aside className="absolute top-16 right-3 bottom-4 w-[390px] max-w-[90vw] bg-slate-900/95 border border-slate-700/80 rounded-sm backdrop-blur-md p-3.5 flex flex-col z-30 shadow-2xl overflow-hidden select-none">
       {/* Header with Title & Coordinates */}
-      <div className="flex items-start justify-between pb-3 border-b border-slate-800">
+      <div className="flex items-start justify-between pb-2.5 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-1.5 text-xs font-mono text-slate-400">
             <Compass className="w-3.5 h-3.5 text-primary" />
@@ -85,7 +85,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
             <span className="text-slate-600">&bull;</span>
             <span className="text-slate-300">D+{leadTime}</span>
           </div>
-          <h2 className="text-base font-bold text-white tracking-tight mt-0.5">
+          <h2 className="text-sm font-bold text-white tracking-tight mt-0.5">
             {properties.region_name}
           </h2>
         </div>
@@ -98,9 +98,9 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
         </button>
       </div>
 
-      <div className="mt-4 space-y-4 font-sans text-xs">
+      <div className="flex-1 overflow-y-auto pr-1 mt-2.5 space-y-2.5 font-sans text-xs">
         {/* Core Metric Banner: FCI & CQR Bounds */}
-        <div className={`p-3.5 rounded-sm border ${fciTier.bg}`}>
+        <div className={`p-3 rounded-sm border ${fciTier.bg}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Gauge className={`w-4 h-4 ${fciTier.color}`} />
@@ -113,8 +113,8 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
             </span>
           </div>
 
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className={`font-mono text-3xl font-black ${fciTier.color}`}>
+          <div className="flex items-baseline gap-2 mt-1.5">
+            <span className={`font-mono text-2xl font-black ${fciTier.color}`}>
               {fci.toFixed(1)}
             </span>
             <span className="font-mono text-slate-400 text-xs">/ 100</span>
@@ -124,49 +124,49 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
           </div>
 
           {/* Conformal CQR Bounds */}
-          <div className="mt-3 pt-2.5 border-t border-slate-700/40 font-mono text-[11px]">
+          <div className="mt-2 pt-2 border-t border-slate-700/40 font-mono text-[11px]">
             <div className="text-slate-400 flex items-center justify-between">
               <span>80% CONFORMAL ERROR BOUND (CQR):</span>
               <span className="text-amber-300 font-bold">{properties.cqr_bounds}</span>
             </div>
-            <div className="mt-1 text-[10px] text-slate-400 leading-tight">
-              Mathematically guaranteed marginal coverage: deterministic NCUM rainfall ({properties.f_precip} mm) is expected to diverge by +{properties.cqr_lower}mm to +{properties.cqr_upper}mm.
+            <div className="mt-0.5 text-[10px] text-slate-400 leading-tight">
+              Coverage guarantee: deterministic NCUM ({properties.f_precip} mm) is expected to diverge by +{properties.cqr_lower}mm to +{properties.cqr_upper}mm.
             </div>
           </div>
         </div>
 
         {/* Deterministic Forecast vs Conformal Expectation */}
         <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
-          <div className="p-2.5 bg-slate-950/70 border border-slate-800 rounded-sm">
+          <div className="p-2 bg-slate-950/70 border border-slate-800 rounded-sm">
             <div className="text-slate-400 text-[10px]">NCUM RAW PRECIP</div>
             <div className="text-sm font-bold text-slate-200 mt-0.5">{properties.f_precip} mm/day</div>
-            <div className="text-[9px] text-slate-400 mt-0.5">Model output</div>
+            <div className="text-[9px] text-slate-500 mt-0.5">Model output</div>
           </div>
-          <div className="p-2.5 bg-slate-950/70 border border-slate-800 rounded-sm">
+          <div className="p-2 bg-slate-950/70 border border-slate-800 rounded-sm">
             <div className="text-slate-400 text-[10px]">ENSEMBLE SPREAD (&sigma;)</div>
             <div className="text-sm font-bold text-primary mt-0.5">&plusmn;{properties.ensemble_spread} mm</div>
-            <div className="text-[9px] text-slate-400 mt-0.5">NEPS-G variance</div>
+            <div className="text-[9px] text-slate-500 mt-0.5">NEPS-G variance</div>
           </div>
         </div>
 
         {/* Linguistic TreeSHAP Driver Matrix */}
-        <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-sm">
-          <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-300 pb-2 border-b border-slate-800/80">
+        <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-sm">
+          <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-300 pb-1.5 border-b border-slate-800/80">
             <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
             <span>PHYSICAL BUST ATTRIBUTION (TreeSHAP)</span>
           </div>
 
-          <div className="mt-2.5 space-y-2">
+          <div className="mt-2 space-y-1.5">
             {properties.shap_drivers && properties.shap_drivers.map((driver, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-2 p-2 bg-slate-900 border border-slate-800 rounded-sm"
+                className="flex items-start gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-sm"
               >
                 <AlertTriangle className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${isSevereBust ? "text-critical" : "text-amber-400"}`} />
                 <div className="leading-snug text-slate-200 font-sans text-[11px]">
-                  <strong className="text-slate-400 font-mono text-[10px] block mb-0.5">
-                    DRIVER #{idx + 1}
-                  </strong>
+                  <span className="text-slate-400 font-mono font-bold text-[10px] mr-1.5">
+                    DRIVER #{idx + 1}:
+                  </span>
                   {driver}
                 </div>
               </div>
@@ -174,7 +174,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
           </div>
 
           {/* Physical feature diagnostics */}
-          <div className="mt-3 pt-2.5 border-t border-slate-800/80 grid grid-cols-2 gap-2 text-[10px] font-mono">
+          <div className="mt-2 pt-1.5 border-t border-slate-800/80 grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] font-mono">
             <div className="flex justify-between text-slate-400">
               <span>CAPE Sounding:</span>
               <span className="text-slate-200 font-semibold">{properties.cape} J/kg</span>
@@ -188,14 +188,14 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
               <span className="text-slate-200 font-semibold">{properties.wind_shear} kts</span>
             </div>
             <div className="flex justify-between text-slate-400">
-              <span>Predictability Horizon:</span>
-              <span className="text-amber-400 font-bold">D+{properties.fss_horizon_day}</span>
+              <span>Horizon:</span>
+              <span className="text-amber-400 font-bold">D+{properties.fss_horizon_day} Limit</span>
             </div>
           </div>
         </div>
 
         {/* Verification Visualization: FSS Decay Curve vs Historical Analogs */}
-        <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-sm">
+        <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-sm">
           <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-300">
               <TrendingDown className="w-3.5 h-3.5 text-primary" />
