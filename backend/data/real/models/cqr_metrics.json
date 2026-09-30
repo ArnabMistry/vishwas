@@ -1,0 +1,29 @@
+{
+  "dataset": {
+    "total_samples": 147150,
+    "train_samples": 98100,
+    "calib_samples": 24525,
+    "test_samples": 24525,
+    "test_bust_count": 470,
+    "test_bust_prevalence_pct": 1.92
+  },
+  "baseline": {
+    "name": "Median Error Baseline (Train Set)",
+    "median_error": 1.3297,
+    "mae": 3.0578,
+    "rmse": 8.4237
+  },
+  "xgboost": {
+    "mae": 2.67,
+    "rmse": 6.4008,
+    "mae_improvement_pct": 12.68,
+    "rmse_improvement_pct": 24.01
+  },
+  "cqr_conformal": {
+    "nominal_coverage_pct": 80.0,
+    "empirical_coverage_pct": 90.99,
+    "mean_interval_width": 8.722,
+    "median_interval_width": 8.2566,
+    "theoretical_assumptions": "Exchangeability of non-conformity scores between calibration and test sets under split conformal inference."
+  }
+}
