@@ -24,6 +24,6 @@
     "empirical_coverage_pct": 90.99,
     "mean_interval_width": 8.722,
     "median_interval_width": 8.2566,
-    "theoretical_assumptions": "Exchangeability of non-conformity scores between calibration and test sets under split conformal inference."
+    "theoretical_assumptions": "Conformal coverage guarantees assume exchangeability of nonconformity scores between calibration and test sets under split conformal regression. Weather time series exhibit temporal autocorrelation and synoptic regime transitions that may modulate finite-sample conditional coverage."
   }
 }

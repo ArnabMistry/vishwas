@@ -8,7 +8,7 @@ This experiment establishes a scientifically defensible real-data validation pip
 4. Finite-sample prediction interval calibration using Split Conformal Prediction (MAPIE).
 5. Explainable local feature attribution using TreeSHAP with operational meteorological interpretations.
 
-> **Important Scientific Note:** This research pipeline validates the mathematical, data engineering, and machine learning framework against historical NOAA GFS (0.25°) and IMD (0.25°) datasets. It is **NOT** an operational validation of NCUM-G (the National Centre for Medium Range Weather Forecasting Unified Model - Global), nor does it substitute for formal operational certification by MoES/NCMRWF.
+> **Important Scientific Note:** This research pipeline validates the mathematical, data engineering, and machine learning framework against historical NOAA GFS (0.25°) and IMD (0.25°) datasets. It is a **real-data evaluation using NOAA GFS 0.25° as an open-access NWP proxy**. It is **NOT** an operational validation of NCUM-G (the National Centre for Medium Range Weather Forecasting Unified Model - Global), nor does it substitute for formal operational certification by MoES/NCMRWF.
 
 ---
 
@@ -31,7 +31,7 @@ This experiment establishes a scientifically defensible real-data validation pip
 
 ### Spatial Alignment
 The reference coordinate framework is established on the IMD 0.25° grid over mainland India ($113 \times 121 = 13,673$ grid points total, with 4,905 valid land cells excluding sea and non-reporting trans-boundary cells).
-GFS longitude coordinates ($0^\circ \text{ to } 360^\circ$) were normalized to standard Greenwich coordinates ($68^\circ \text{ to } 98^\circ\text{E}$). A 2D spatial KDTree was constructed to perform nearest-neighbor regridding of GFS meteorological fields onto the IMD grid points, preserving exact point-to-point correspondence with zero spatial drift.
+GFS longitude coordinates ($0^\circ \text{ to } 360^\circ$) were converted to standard Greenwich coordinates ($68^\circ \text{ to } 98^\circ\text{E}$). Spatial regridding of GFS meteorological fields onto the IMD grid points was performed via **nearest-neighbor interpolation using xarray onto the IMD grid** (`xarray.Dataset.interp(method="nearest")`), preserving exact coordinate correspondence without introducing spatial distortion.
 
 ### Temporal Accumulation Alignment
 In GFS GRIB2 outputs, the total precipitation (`APCP`) variable represents accumulated precipitation from the preceding accumulation cycle reset:
@@ -42,18 +42,20 @@ The valid 24-hour forecast accumulation matching the IMD observational window (0
 $$\text{APCP}_{24\text{h}} = \max\left(\text{APCP}_{+27\text{h}} - \text{APCP}_{+3\text{h}},\, 0.0\right)$$
 Values below zero resulting from numerical precision artifacts are clamped strictly to $0.0\text{ mm}$.
 
-### Forecast Error & Bust Metrics
+### Forecast Error & Operational Metrics
 - **Forecast Error Magnitude ($y$):**
   $$y = \left| \text{APCP}_{24\text{h}} - \text{Rain}_{\text{IMD}} \right|$$
-  Measures the absolute difference between model prediction and observed rainfall in millimeters.
+  Measures the absolute difference between model prediction and observed rainfall in millimeters (`error_abs`).
 - **Categorical Forecast Bust:**
   A binary indicator marking severe forecast divergence:
-  $$\text{Bust} = \mathbb{I}\left( y \ge 20.0\text{ mm} \;\land\; \frac{y}{\max(\text{APCP}_{24\text{h}}, 1.0)} \ge 0.5 \right)$$
+  $$\text{Bust} = \mathbb{I}\left( \text{error\_abs} > 25.0\text{ mm} \;\land\; (\text{APCP}_{24\text{h}} > 10.0\text{ mm} \;\lor\; \text{Rain}_{\text{IMD}} > 10.0\text{ mm}) \right)$$
 - **Forecast Confidence Index (FCI):**
-  A continuous confidence score bounded between 0 and 100:
-  $$\text{FCI} = \text{clip}\left(100 \times \left(1.0 - \frac{y}{\text{APCP}_{24\text{h}} + 15.0}\right),\, 10.0,\, 99.0\right)$$
-- **Derived Bust Risk Score:**
-  A calibrated risk score combining predicted error magnitude, upper conformal bound, and atmospheric instability indicators into a 0.0–1.0 operational index.
+  Forecast Confidence Index derived from conformal prediction interval width:
+  $$\text{FCI} = \text{clip}\left(100.0 - \frac{\text{interval\_width}}{22.0} \times 85.0,\, 5.0,\, 96.0\right)$$
+  FCI is a heuristic confidence index based on conformal interval width, not a calibrated probability.
+- **Derived Bust Risk Score (`bust_risk_score`):**
+  $$\text{bust\_risk\_score} = \text{clip}\left(\frac{\hat{y}}{35.0} + \mathbb{I}(\text{upper\_bound} > 25.0) \times 0.15,\, 0.01,\, 0.98\right)$$
+  A derived model-based risk indicator in [0, 1]. It is **not** a calibrated probability of forecast bust. The legacy key `bust_prob` is retained as a compatibility alias.
 
 ---
 
@@ -92,23 +94,21 @@ The naive reference baseline predicts the median forecast error observed in the 
 
 ## 6. XGBoost Performance
 
-An `XGBRegressor` was trained on 8 synoptic and thermodynamic features:
-1. `gfs_apcp_24h`: 24-hour accumulated forecast precipitation (mm)
-2. `t2m`: 2-meter air temperature (K)
-3. `u10`, `v10`: 10-meter zonal and meridional wind components (m/s)
-4. `wind_speed_10m`: 10-meter resultant scalar wind speed (m/s)
-5. `mslp`: Mean sea level pressure (Pa)
-6. `sp`: Surface air pressure (Pa)
-7. `cape`: Convective Available Potential Energy (J/kg)
-8. `pwat`: Total column precipitable water ($\text{kg/m}^2$)
+An `XGBRegressor` was trained on exactly 7 synoptic, thermodynamic, and spatial features:
+1. `f_apcp_24h`: 24-hour accumulated forecast precipitation (mm)
+2. `f_cape`: Convective Available Potential Energy (J/kg)
+3. `f_hgt_500`: 500-hPa geopotential height (gpm)
+4. `f_u_850`: 850-hPa zonal wind component (m/s)
+5. `f_v_850`: 850-hPa meridional wind component (m/s)
+6. `lat`: Latitude coordinate (degrees North)
+7. `lon`: Longitude coordinate (degrees East)
 
 ### Hyperparameters
-- Estimators: 100
-- Maximum Tree Depth: 6
-- Learning Rate: 0.08
-- Subsample: 0.80
-- Column Sample by Tree: 0.80
-- Random State: 42
+- Estimators: `n_estimators = 100`
+- Maximum Tree Depth: `max_depth = 5`
+- Learning Rate: `learning_rate = 0.1`
+- Tree Method: `tree_method = "hist"`
+- Random State: `random_state = 42`
 
 ### Test Set Evaluation Results
 | Model Metric | Baseline Model | XGBoost Regressor | Relative Improvement |
@@ -120,9 +120,11 @@ The 24.01% reduction in RMSE demonstrates that meteorological feature interactio
 
 ---
 
-## 7. Conformal Prediction Interval (CQR / MAPIE) Evaluation
+## 7. Split Conformal Prediction (MAPIE) Evaluation
 
 To quantify uncertainty with distribution-free finite-sample guarantees, Split Conformal Prediction was implemented using `MAPIE` (`SplitConformalRegressor` with absolute residual nonconformity score).
+
+*(Note: Artifacts and schema keys such as `cqr_model.pkl`, `cqr_lower`, `cqr_upper`, and `cqr_bounds` are retained for backward compatibility with existing API endpoints and frontend components; the statistical methodology implemented is Split Conformal Prediction, not Conformalized Quantile Regression).*
 
 ### Calibration Configuration
 - Calibration Partition: August 22 – August 26, 2023 ($N_{\text{cal}} = 24,525$)
@@ -137,34 +139,29 @@ To quantify uncertainty with distribution-free finite-sample guarantees, Split C
 | **Median Interval Width** | — | **8.2566 mm** |
 | **Lower Bound Clamping** | $\ge 0.0\text{ mm}$ | Enforced (Non-negative rainfall error) |
 
-**Theoretical Assessment:** The empirical test coverage of 90.99% comfortably satisfies the nominal 80.00% guarantee under the assumption of exchangeability between calibration and test residuals. The slight conservative over-coverage (90.99% vs 80.00%) is expected due to the transition into the late-August monsoon break phase, where lower overall variance in rainfall led to smaller actual residuals than those calibrated during the preceding active rain spell.
+**Statistical Assessment:** The empirical test-set coverage was 90.99% for the nominal 80% split-conformal interval. Conformal coverage guarantees rely on exchangeability-related assumptions between calibration and test partitions; weather time series can exhibit temporal dependence and synoptic regime changes that modulate finite-sample conditional coverage. The conservative empirical coverage (90.99% vs 80.00%) reflects the synoptic transition into the late-August monsoon break phase, where lower overall rainfall variance resulted in smaller actual residuals than those calibrated during the preceding active rain spell.
 
 ---
 
 ## 8. SHAP Local Attribution
 
-TreeSHAP (`shap.TreeExplainer`) was applied to the trained XGBoost model to extract exact local feature attributions across the 4,905 grid cells.
+TreeSHAP (`shap.TreeExplainer`) was applied to the trained XGBoost model to extract exact local feature attributions across the 4,905 grid cells. SHAP values represent model-attributed feature importance for predicted error magnitude and do not make causal meteorological claims.
 
-### Global Attribution Hierarchy
-1. **Forecast Precipitation (`gfs_apcp_24h`):** Dominant variance driver (+0.82 mean $|$SHAP$|$). Large forecasted precipitation events systematically scale error variance.
-2. **Precipitable Water (`pwat`):** Secondary driver (+0.41 mean $|$SHAP$|$). High atmospheric column moisture without corresponding precipitation triggers high error attribution.
-3. **Surface Pressure (`sp`):** Orographic driver (+0.28 mean $|$SHAP$|$). Marks terrain discontinuity along the Western Ghats and Himalayan foothills where GFS 0.25° resolution smooths steep topography.
-4. **10m Wind Speed (`wind_speed_10m`) & CAPE:** Convective trigger indicators (+0.19 mean $|$SHAP$|$). Modulates boundary layer moisture convergence and convective burst risk.
-
-### Operational Meteorologist Translations
-To provide actionable intelligence to duty forecasters, raw SHAP values are automatically mapped to plain-English meteorological rationales:
-- `High APCP + Low CAPE`: *"Stratiform overestimation bias: Model projects elevated precipitation despite weak convective instability."*
-- `High PWAT + High Wind Speed`: *"Moisture convergence advection: Strong synoptic wind transport over saturated column increases boundary displacement risk."*
-- `Low Surface Pressure + High Error`: *"Orographic forcing mismatch: High terrain gradient induces localized precipitation displacement."*
+### Attribution Descriptions
+- **Forecast Precipitation (`f_apcp_24h`):** Primary driver of error scale. Heavy precipitation forecast magnitude correlates with increased predicted uncertainty.
+- **CAPE (`f_cape`):** Elevated convective available potential energy is model-attributed to higher predicted forecast error.
+- **500 hPa Height (`f_hgt_500`):** Geopotential height anomalies contribute to model-attributed synoptic error.
+- **850 hPa Wind Components (`f_u_850`, `f_v_850`):** Low-level monsoon flow structure and shear align with directional error attribution.
+- **Spatial Coordinates (`lat`, `lon`):** Geographic location attributes to regional baseline forecast uncertainty across basins.
 
 ---
 
 ## 9. Scientific Limitations
 
-1. **Model Proxy Limitation:** NOAA GFS is utilized as an open-access proxy to validate the end-to-end mathematical and ML pipeline. NCUM-G (UK Met Office Unified Model core customized by NCMRWF) exhibits distinct physical parameterizations, convection schemes, and boundary layer physics. These findings cannot be substituted for NCUM-G operational performance.
-2. **Temporal Window Sample Size:** The dataset spans 1 month (August 2023). While August 2023 captures both active and break phases of the Indian Summer Monsoon, multi-year validation (encompassing pre-monsoon, post-monsoon cyclonic events, and multiple monsoon seasons) is essential for operational deployment.
-3. **Nearest-Neighbor Regridding:** 0.25° nearest-neighbor interpolation preserves extrema but does not conserve area-integrated water mass. Future operational iterations should utilize second-order conservative regridding.
-4. **Exchangeability Assumption:** Conformal prediction intervals rely on the exchangeability of nonconformity scores. Synoptic weather regimes introduce temporal autocorrelation that can induce conditional under-coverage during abrupt weather transitions.
+1. **Proxy NWP Model:** NOAA GFS (0.25°) is used as an open-access research proxy to validate the data engineering, ML error quantification, and split conformal calibration pipeline. These findings cannot be claimed as an operational validation of NCUM-G.
+2. **Temporal Window Sample Size:** The evaluation is conducted on August 2023 (capturing active and break phases of the Indian Summer Monsoon). Multi-year, multi-season validation across pre-monsoon, monsoon, and post-monsoon cyclonic regimes is essential for operational deployment.
+3. **Regridding Scheme:** Spatial alignment uses nearest-neighbor interpolation using xarray onto the IMD grid, which preserves point extrema but does not enforce area-integrated mass conservation.
+4. **Exchangeability Assumption:** Conformal prediction intervals rely on the exchangeability of nonconformity scores. Synoptic persistence and weather regime transitions introduce temporal autocorrelation that can induce conditional variability in coverage.
 
 ---
 
