@@ -1,0 +1,9 @@
+{
+  "model": "XGBoost + MAPIE CQR",
+  "coverage_guarantee": "80%",
+  "alpha": 0.2,
+  "median_error": 57.83,
+  "cqr_lower": 4.49,
+  "cqr_upper": 43.1,
+  "status": "VALIDATED"
+}
