@@ -52,7 +52,9 @@ export default function Home() {
   const fetchGridData = useCallback(async (lt: number) => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/forecast/grid?lead_time=${lt}`);
+      const isRealMode = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+      const modeParam = isRealMode ? "&mode=real" : "";
+      const res = await fetch(`${API_BASE}/api/v1/forecast/grid?lead_time=${lt}${modeParam}`);
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
       const data: ForecastGridGeoJSON = await res.json();
       setGridData(data);
@@ -77,7 +79,9 @@ export default function Home() {
   // 2. Fetch point details when cell is selected
   const fetchPointDetails = useCallback(async (lat: number, lon: number, lt: number) => {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/forecast/point?lat=${lat}&lon=${lon}&lead_time=${lt}`);
+      const isRealMode = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+      const modeParam = isRealMode ? "&mode=real" : "";
+      const res = await fetch(`${API_BASE}/api/v1/forecast/point?lat=${lat}&lon=${lon}&lead_time=${lt}${modeParam}`);
       if (res.ok) {
         const data: PointDetailsResponse = await res.json();
         setPointDetails(data);
@@ -86,6 +90,7 @@ export default function Home() {
       console.warn("Could not fetch detailed point timeseries:", err);
     }
   }, []);
+
 
   // 3. Initial load of alerts and telemetry status
   useEffect(() => {

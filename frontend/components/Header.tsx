@@ -41,6 +41,8 @@ export const Header: React.FC<HeaderProps> = ({
     return () => clearInterval(interval);
   }, []);
 
+  const isRealMode = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+
   return (
     <header className="w-full bg-slate-950 border-b border-slate-800 text-slate-200 z-30 select-none">
       {/* Top Banner if disconnected */}
@@ -48,7 +50,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="bg-critical/90 text-white px-4 py-1.5 text-xs font-mono font-semibold flex items-center justify-between border-b border-critical">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 animate-pulse" />
-            <span>SYSTEM ERROR: NCUM-G telemetry disconnected. ({systemError})</span>
+            <span>SYSTEM ERROR: Telemetry disconnected. ({systemError})</span>
           </div>
           <span className="text-[11px] underline cursor-pointer" onClick={() => window.location.reload()}>
             RECONNECT STREAM
@@ -69,6 +71,16 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded-sm bg-slate-800 border border-slate-700 text-primary font-medium tracking-tight">
                   NCMRWF / MoES
                 </span>
+                <span
+                  id="data-mode-indicator"
+                  className={`text-[10px] uppercase font-mono px-1.5 py-0.5 rounded-sm border font-medium tracking-tight ${
+                    isRealMode
+                      ? "bg-emerald-950/80 border-emerald-700/80 text-emerald-400"
+                      : "bg-slate-800/80 border-slate-700/80 text-slate-400"
+                  }`}
+                >
+                  {isRealMode ? "[REAL DATA: AUG 2023]" : "[SYNTHETIC DEMO]"}
+                </span>
                 {isLoading && (
                   <RefreshCw className="w-3.5 h-3.5 text-primary animate-spin" />
                 )}
@@ -85,11 +97,21 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="hidden xl:flex items-center gap-4 text-xs font-mono">
             <div className="flex items-center gap-1.5 text-slate-400">
               <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-              <span>Model: <strong className="text-slate-200">NCUM-G (12km, 70L)</strong></span>
+              <span>
+                Model:{" "}
+                <strong className="text-slate-200">
+                  {isRealMode ? "NOAA-GFS 0.25° (Aug 2023)" : "NCUM-G (12km, 70L)"}
+                </strong>
+              </span>
             </div>
             <div className="flex items-center gap-1.5 text-slate-400">
               <Database className="w-3.5 h-3.5 text-primary" />
-              <span>Cycle: <strong className="text-slate-200">00Z Assimilation</strong></span>
+              <span>
+                Cycle:{" "}
+                <strong className="text-slate-200">
+                  {isRealMode ? "Aug 2023 Verification" : "00Z Assimilation"}
+                </strong>
+              </span>
             </div>
             <div className="flex items-center gap-1.5 text-slate-400">
               <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
@@ -97,6 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
         </div>
+
 
         {/* Right: Operational Clocks, Lead Time Badge & Telemetry Button */}
         <div className="flex items-center gap-3">

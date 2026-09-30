@@ -75,3 +75,32 @@ def test_alerts_dna_barcode():
     # Alerts must be sorted by bust_prob descending
     probs = [a["bust_prob"] for a in data]
     assert probs == sorted(probs, reverse=True)
+
+def test_forecast_grid_real_mode():
+    response = client.get("/api/v1/forecast/grid?mode=real")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["type"] == "FeatureCollection"
+    assert data["properties"]["mode"] == "REAL"
+    assert len(data["features"]) == 4905
+    props = data["features"][0]["properties"]
+    assert "bust_risk_score" in props
+    assert "cqr_lower" in props
+    assert "cqr_upper" in props
+    assert "fci" in props
+
+def test_forecast_grid_demo_mode_explicit():
+    response = client.get("/api/v1/forecast/grid?mode=demo&lead_time=1")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["features"]) == 840
+
+def test_forecast_point_real_mode():
+    # Test point inspection in real mode for a central India point
+    response = client.get("/api/v1/forecast/point?lat=20.0&lon=85.0&mode=real")
+    assert response.status_code == 200
+    data = response.json()
+    assert "matched_cell" in data
+    assert "properties" in data
+    assert "bust_risk_score" in data["properties"]
+

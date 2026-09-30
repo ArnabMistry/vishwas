@@ -14,9 +14,11 @@ import json
 import math
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+REAL_DATA_PATH = os.path.join(DATA_DIR, "real", "api_output", "real_grid_D1.geojson")
 
 # In-memory cache for grids 1-10 for sub-millisecond serving
 GRIDS_CACHE: Dict[int, Dict[str, Any]] = {}
+REAL_GRID_CACHE: Optional[Dict[str, Any]] = None
 
 def get_grid_data(lead_time: int) -> Dict[str, Any]:
     if lead_time not in GRIDS_CACHE:
@@ -27,6 +29,18 @@ def get_grid_data(lead_time: int) -> Dict[str, Any]:
             GRIDS_CACHE[lead_time] = json.load(f)
     return GRIDS_CACHE[lead_time]
 
+def get_real_grid_data() -> Dict[str, Any]:
+    global REAL_GRID_CACHE
+    if REAL_GRID_CACHE is None:
+        if not os.path.exists(REAL_DATA_PATH):
+            raise HTTPException(
+                status_code=404,
+                detail=f"Real data artifact '{os.path.basename(REAL_DATA_PATH)}' not found. Phase 2 real-data pipeline must be run first."
+            )
+        with open(REAL_DATA_PATH, "r", encoding="utf-8") as f:
+            REAL_GRID_CACHE = json.load(f)
+    return REAL_GRID_CACHE
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Preload grids on startup
@@ -35,7 +49,14 @@ async def lifespan(app: FastAPI):
             get_grid_data(lt)
         except Exception as e:
             print(f"Warning: Failed to preload grid_{lt}.geojson: {e}")
+    # Preload real grid if present
+    try:
+        if os.path.exists(REAL_DATA_PATH):
+            get_real_grid_data()
+    except Exception as e:
+        print(f"Notice: Real-data artifact not loaded on startup: {e}")
     yield
+
 
 app = FastAPI(
     title="VISHWAS API - Forecast Reliability Engine",
@@ -134,22 +155,36 @@ def get_system_status():
     )
 
 @app.get("/api/v1/forecast/grid")
-def get_forecast_grid(lead_time: int = Query(1, ge=1, le=10, description="Lead time in days (1 to 10)")):
-    """Returns the full GeoJSON FeatureCollection for the selected lead time."""
+def get_forecast_grid(
+    lead_time: int = Query(1, ge=1, le=10, description="Lead time in days (1 to 10)"),
+    mode: Optional[str] = Query(None, description="Data mode: 'demo' (synthetic) or 'real' (August 2023 evaluation)")
+):
+    """
+    Returns the full GeoJSON FeatureCollection for the selected lead time.
+    When mode='real', serves real_grid_D1.geojson from the Phase 2 research pipeline.
+    When mode is omitted or 'demo', serves existing synthetic demo grid.
+    """
+    if mode and mode.strip().lower() == "real":
+        return get_real_grid_data()
     return get_grid_data(lead_time)
 
 @app.get("/api/v1/forecast/point")
 def get_forecast_point(
     lat: float = Query(..., description="Latitude"),
     lon: float = Query(..., description="Longitude"),
-    lead_time: int = Query(1, ge=1, le=10, description="Lead time in days")
+    lead_time: int = Query(1, ge=1, le=10, description="Lead time in days"),
+    mode: Optional[str] = Query(None, description="Data mode: 'demo' or 'real'")
 ):
     """
     Finds the nearest grid cell to the specified lat/lon and provides
     time-series evolution, CQR bounds, FSS decay curve, and historical analogs.
     """
-    grid = get_grid_data(lead_time)
+    if mode and mode.strip().lower() == "real":
+        grid = get_real_grid_data()
+    else:
+        grid = get_grid_data(lead_time)
     features = grid.get("features", [])
+
 
     # Find closest grid feature
     best_dist = float("inf")
