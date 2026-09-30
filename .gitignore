@@ -52,3 +52,16 @@ secrets/
 # OS
 .DS_Store
 Thumbs.db
+
+# Real Data Validation artifacts (raw NWP and IMD downloads)
+backend/data/real/raw/
+backend/data/real/processed/
+!backend/data/real/raw/.gitkeep
+!backend/data/real/processed/.gitkeep
+!backend/data/real/features/.gitkeep
+!backend/data/real/models/.gitkeep
+!backend/data/real/api_output/.gitkeep
+*.idx
+*.grib
+*.grib2
+
