@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Header } from "../components/Header";
 import { TimelineOverlay } from "../components/TimelineOverlay";
@@ -217,13 +217,21 @@ export default function Home() {
     [isRealMode, fetchPointDetails]
   );
 
+  const selectedRegionRef = useRef<GridProperties | null>(null);
+  useEffect(() => {
+    selectedRegionRef.current = selectedRegion;
+  }, [selectedRegion]);
+
   const handleLeadTimeChange = useCallback((newLead: number) => {
     if (isRealMode && newLead > 9) {
       console.warn("D+10 is unavailable in REAL mode.");
       return;
     }
     setLeadTime(newLead);
-  }, [isRealMode]);
+    if (selectedRegionRef.current) {
+      fetchPointDetails(selectedRegionRef.current.lat, selectedRegionRef.current.lon, newLead);
+    }
+  }, [isRealMode, fetchPointDetails]);
 
   return (
     <div className="relative w-screen h-screen flex flex-col bg-slate-900 text-slate-200 overflow-hidden select-none">

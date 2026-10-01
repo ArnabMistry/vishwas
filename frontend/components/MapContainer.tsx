@@ -548,7 +548,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
               <strong className="text-amber-300">{hoverInfo.properties.cqr_bounds}</strong>
             </div>
           </div>
-          <div className="text-[9px] text-primary/80 mt-1 italic">Click cell to inspect TreeSHAP physics</div>
+          <div className="text-[9px] text-primary/80 mt-1 italic">Click cell to inspect forecast reliability &amp; TreeSHAP physics</div>
         </div>
       )}
     </div>
