@@ -32,7 +32,7 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const isRealMode = propIsRealMode !== undefined
     ? propIsRealMode
-    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() !== "DEMO";
 
   // Auto-collapse on tablet / mobile when inspector opens to prevent tiny map sliver
   useEffect(() => {
@@ -61,7 +61,7 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
         <button
           onClick={() => setIsCollapsed(false)}
           className="w-11 h-11 bg-slate-900/95 border border-slate-700/80 rounded-sm text-slate-300 hover:text-white flex items-center justify-center shadow-xl backdrop-blur-md"
-          title={isRealMode ? "Expand Validation Overview" : "Expand Operations Overview"}
+          title={isRealMode ? "Expand Reliability Overview" : "Expand Operations Overview"}
         >
           <BarChart2 className="w-5 h-5 text-primary" />
         </button>
@@ -71,7 +71,7 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
           <div className="flex items-center justify-between pb-2 border-b border-slate-800">
             <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-slate-200">
               <Activity className="w-4 h-4 text-primary" />
-              <span>{isRealMode ? "HISTORICAL OVERVIEW" : "OPERATIONS OVERVIEW"}</span>
+              <span>{isRealMode ? "RELIABILITY OVERVIEW" : "OPERATIONS OVERVIEW"}</span>
             </div>
             <button
               onClick={() => setIsCollapsed(true)}
@@ -158,7 +158,7 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
               <div className="flex items-center justify-between pb-1 text-xs font-mono font-bold text-slate-300">
                 <span className="flex items-center gap-1.5">
                   <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-                  {isRealMode ? "HISTORICAL MONITORED ZONES" : "MONITORED BUST ZONES"}
+                  {isRealMode ? "MONITORED RISK ZONES" : "MONITORED BUST ZONES"}
                 </span>
                 <span className="text-[9px] text-slate-500 font-normal">CLICK TO FLY</span>
               </div>

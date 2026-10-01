@@ -21,7 +21,7 @@ export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
 
   const isRealMode = propIsRealMode !== undefined
     ? propIsRealMode
-    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL" ||
+    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() !== "DEMO" ||
       statusData?.status === "HISTORICAL_VALIDATION";
 
   return (

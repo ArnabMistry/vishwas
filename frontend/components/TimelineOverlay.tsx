@@ -20,7 +20,7 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
 }) => {
   const isRealMode = propIsRealMode !== undefined
     ? propIsRealMode
-    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() !== "DEMO";
   const maxLead = isRealMode ? 9 : 10;
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 

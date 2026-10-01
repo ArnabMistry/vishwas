@@ -50,7 +50,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
 }) => {
   const isRealMode = propIsRealMode !== undefined
     ? propIsRealMode
-    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() !== "DEMO";
   const mapRef = useRef<MapRef | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{

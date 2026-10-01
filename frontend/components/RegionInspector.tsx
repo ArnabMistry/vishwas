@@ -30,7 +30,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
   const [viewMode, setViewMode] = useState<"fss" | "analogs">("fss");
   const isRealMode = propIsRealMode !== undefined
     ? propIsRealMode
-    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() !== "DEMO";
 
   if (!properties) return null;
 
@@ -325,7 +325,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
           <div className="p-3 bg-critical/10 border border-critical/40 rounded-sm font-sans text-xs">
             <div className="flex items-center gap-1.5 font-mono font-bold text-critical text-[11px]">
               <AlertTriangle className="w-3.5 h-3.5" />
-              <span>{isRealMode ? "HISTORICAL VALIDATION ALERT DIRECTIVE" : "OPERATIONAL DIRECTIVE FOR MOES FORECASTERS"}</span>
+              <span>{isRealMode ? "OPERATIONAL FORECAST DIRECTIVE" : "OPERATIONAL DIRECTIVE FOR MOES FORECASTERS"}</span>
             </div>
             <p className="mt-1.5 text-slate-200 text-[11px] leading-relaxed">
               {isRealMode ? (

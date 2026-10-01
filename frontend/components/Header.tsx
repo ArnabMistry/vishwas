@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const isRealMode = propIsRealMode !== undefined
     ? propIsRealMode
-    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() !== "DEMO";
 
   return (
     <header className="w-full bg-slate-950 border-b border-slate-800 text-slate-200 z-30 select-none">
@@ -80,14 +80,14 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   id="data-mode-indicator"
                   onClick={onToggleMode}
-                  className={`text-[9px] sm:text-[10px] uppercase font-mono px-1 sm:px-1.5 py-0.5 rounded-sm border font-medium tracking-tight transition-colors cursor-pointer ${
+                  className={`text-[9px] sm:text-[10px] uppercase font-mono px-1.5 py-0.5 rounded-sm border font-medium tracking-tight transition-colors cursor-pointer ${
                     isRealMode
                       ? "bg-emerald-950/80 border-emerald-700/80 text-emerald-400 hover:bg-emerald-900/80"
                       : "bg-slate-800/80 border-slate-700/80 text-slate-400 hover:bg-slate-700/80"
                   }`}
-                  title={onToggleMode ? `Click to switch to ${isRealMode ? "DEMO" : "REAL"} mode` : undefined}
+                  title={onToggleMode ? `Click to switch to ${isRealMode ? "SYNTHETIC DEMO" : "REAL DATA"} mode` : undefined}
                 >
-                  {isRealMode ? "[REAL DATA: AUG 2023]" : "[SYNTHETIC DEMO]"}
+                  {isRealMode ? "[REAL DATA: GFS 0.25°]" : "[SYNTHETIC DEMO]"}
                 </button>
                 {isLoading && (
                   <RefreshCw className="w-3.5 h-3.5 text-primary animate-spin" />
@@ -110,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span>
                 Model:{" "}
                 <strong className="text-slate-200">
-                  {isRealMode ? "NOAA-GFS 0.25° (Aug 2023 Proxy)" : "NCUM-G (12km, 70L)"}
+                  {isRealMode ? "NOAA-GFS 0.25° (Aug 2023)" : "NCUM-G (12km, 70L)"}
                 </strong>
               </span>
             </div>
@@ -119,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span>
                 Cycle:{" "}
                 <strong className="text-slate-200">
-                  {isRealMode ? "Aug 2023 Verification" : "00Z Assimilation"}
+                  {isRealMode ? "Aug 2023 Validation" : "00Z Assimilation"}
                 </strong>
               </span>
             </div>

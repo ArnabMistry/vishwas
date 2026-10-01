@@ -31,14 +31,23 @@ import {
 const API_BASE = "";
 
 export default function Home() {
-  const envReal = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
-  const [isRealMode, setIsRealMode] = useState<boolean>(envReal);
+  // Default to REAL mode as the primary VISHWAS product experience
+  // Explicit ?mode=demo switches to synthetic DEMO mode
+  const [isRealMode, setIsRealMode] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      const param = new URLSearchParams(window.location.search).get("mode");
+      if (param) return param.toLowerCase() !== "demo";
+    }
+    const env = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase();
+    if (env === "DEMO") return false;
+    return true; // Default to REAL mode
+  });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const param = new URLSearchParams(window.location.search).get("mode");
       if (param) {
-        setIsRealMode(param.toLowerCase() === "real");
+        setIsRealMode(param.toLowerCase() !== "demo");
       }
     }
   }, []);
