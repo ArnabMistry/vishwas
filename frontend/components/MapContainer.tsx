@@ -385,14 +385,29 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     []
   );
 
-  // Highlight layer for the selected cell
+  // Highlight fill layer for the selected cell
+  const highlightFillLayerStyle: LayerProps = useMemo(
+    () => ({
+      id: "bust-highlight-fill",
+      type: "fill",
+      source: "forecast-grid",
+      paint: {
+        "fill-color": "#38BDF8",
+        "fill-opacity": 0.28,
+      },
+      filter: selectedGridId ? ["==", ["get", "grid_id"], selectedGridId] : ["==", ["get", "grid_id"], ""],
+    }),
+    [selectedGridId]
+  );
+
+  // High-contrast highlight border for the selected cell
   const highlightLayerStyle: LayerProps = useMemo(
     () => ({
       id: "bust-highlight",
       type: "line",
       source: "forecast-grid",
       paint: {
-        "line-color": "#38BDF8",
+        "line-color": "#FFFFFF",
         "line-width": 3.0,
         "line-opacity": 1.0,
       },
@@ -494,6 +509,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         {/* Active Selection Highlight Layer */}
         {gridData && (
           <Source id="forecast-grid-highlight" type="geojson" data={gridData}>
+            <Layer {...highlightFillLayerStyle} />
             <Layer {...highlightLayerStyle} />
           </Source>
         )}

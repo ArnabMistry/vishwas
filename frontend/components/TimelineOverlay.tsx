@@ -115,19 +115,20 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
           )}
         </div>
 
-        {/* Right: Bivariate Legend Preview */}
-        <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono">
-          <span className="text-slate-400 flex items-center gap-1">
+        {/* Right: Bust Risk Gradient Legend */}
+        <div className="hidden sm:flex items-center gap-2.5 text-[10px] font-mono bg-slate-900/90 px-2.5 py-1 rounded-sm border border-slate-800">
+          <span className="text-slate-400 flex items-center gap-1.5 font-semibold">
             <Layers className="w-3 h-3 text-primary" />
-            {isRealMode ? "BUST RISK:" : "CFRF BUST:"}
+            <span>{isRealMode ? "BUST RISK:" : "CFRF BUST:"}</span>
           </span>
-          <div className="flex items-center gap-1">
-            <div className="w-2.5 h-2.5 bg-[#0F172A] border border-slate-700" title="Stable (<0.3)" />
-            <span className="text-slate-500 text-[9px]">0.0</span>
-            <div className="w-2.5 h-2.5 bg-[#38BDF8]" title="Nominal (0.5)" />
-            <div className="w-2.5 h-2.5 bg-[#F59E0B]" title="Warning (0.75)" />
-            <div className="w-2.5 h-2.5 bg-[#E11D48]" title="Severe (>0.85)" />
-            <span className="text-slate-500 text-[9px]">1.0</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-slate-400 text-[9px] font-medium">0% (LOW)</span>
+            <div
+              className="w-28 h-2 rounded-sm border border-slate-700/80 shadow-inner"
+              style={{ background: "linear-gradient(to right, #10233D 0%, #0284C7 30%, #F59E0B 60%, #E11D48 85%, #9F1239 100%)" }}
+              title="Forecast Bust Risk gradient: Low (<30%) to Severe (>80%)"
+            />
+            <span className="text-rose-400 font-bold text-[9px]">100% (HIGH)</span>
           </div>
         </div>
       </div>
