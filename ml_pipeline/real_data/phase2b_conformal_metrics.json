@@ -1,0 +1,1707 @@
+{
+  "metadata": {
+    "title": "VISHWAS Phase 2B: Conformal Coverage Stress Test (Track A)",
+    "nominal_coverage_pct": 80.0,
+    "leads_evaluated": [
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5",
+      "D6",
+      "D7",
+      "D8",
+      "D9"
+    ],
+    "methodology": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+    "classification_bins": {
+      "at_or_above_nominal": ">= 80.0%",
+      "modestly_below_nominal": "75.0% - 79.99%",
+      "materially_below_nominal": "< 75.0%"
+    },
+    "disclaimer": "This is a diagnostic study examining calibration-to-test distribution properties. Causality is not established. Subgroup statistics are diagnostic only."
+  },
+  "monthly_table_a_coverage": [
+    {
+      "month": "July 2023",
+      "lead": "D1",
+      "coverage_pct": 84.19,
+      "shortfall_pct": 4.19,
+      "mean_width": 16.4212,
+      "median_width": 17.8553
+    },
+    {
+      "month": "July 2023",
+      "lead": "D2",
+      "coverage_pct": 81.4,
+      "shortfall_pct": 1.4,
+      "mean_width": 15.9897,
+      "median_width": 17.7129
+    },
+    {
+      "month": "July 2023",
+      "lead": "D3",
+      "coverage_pct": 78.29,
+      "shortfall_pct": -1.71,
+      "mean_width": 17.5764,
+      "median_width": 19.0802
+    },
+    {
+      "month": "July 2023",
+      "lead": "D4",
+      "coverage_pct": 83.47,
+      "shortfall_pct": 3.47,
+      "mean_width": 20.4134,
+      "median_width": 21.5176
+    },
+    {
+      "month": "July 2023",
+      "lead": "D5",
+      "coverage_pct": 80.42,
+      "shortfall_pct": 0.42,
+      "mean_width": 20.1723,
+      "median_width": 21.6243
+    },
+    {
+      "month": "July 2023",
+      "lead": "D6",
+      "coverage_pct": 79.73,
+      "shortfall_pct": -0.27,
+      "mean_width": 18.0871,
+      "median_width": 19.8209
+    },
+    {
+      "month": "July 2023",
+      "lead": "D7",
+      "coverage_pct": 82.36,
+      "shortfall_pct": 2.36,
+      "mean_width": 18.019,
+      "median_width": 19.1588
+    },
+    {
+      "month": "July 2023",
+      "lead": "D8",
+      "coverage_pct": 78.58,
+      "shortfall_pct": -1.42,
+      "mean_width": 17.58,
+      "median_width": 19.4236
+    },
+    {
+      "month": "July 2023",
+      "lead": "D9",
+      "coverage_pct": 79.3,
+      "shortfall_pct": -0.7,
+      "mean_width": 15.6718,
+      "median_width": 17.6365
+    },
+    {
+      "month": "August 2023",
+      "lead": "D1",
+      "coverage_pct": 90.99,
+      "shortfall_pct": 10.99,
+      "mean_width": 8.722,
+      "median_width": 8.2566
+    },
+    {
+      "month": "August 2023",
+      "lead": "D2",
+      "coverage_pct": 93.24,
+      "shortfall_pct": 13.24,
+      "mean_width": 8.0687,
+      "median_width": 7.3212
+    },
+    {
+      "month": "August 2023",
+      "lead": "D3",
+      "coverage_pct": 90.37,
+      "shortfall_pct": 10.37,
+      "mean_width": 7.8174,
+      "median_width": 7.7298
+    },
+    {
+      "month": "August 2023",
+      "lead": "D4",
+      "coverage_pct": 80.27,
+      "shortfall_pct": 0.27,
+      "mean_width": 7.9565,
+      "median_width": 8.1895
+    },
+    {
+      "month": "August 2023",
+      "lead": "D5",
+      "coverage_pct": 80.91,
+      "shortfall_pct": 0.91,
+      "mean_width": 10.4663,
+      "median_width": 11.0057
+    },
+    {
+      "month": "August 2023",
+      "lead": "D6",
+      "coverage_pct": 72.36,
+      "shortfall_pct": -7.64,
+      "mean_width": 9.8238,
+      "median_width": 10.6987
+    },
+    {
+      "month": "August 2023",
+      "lead": "D7",
+      "coverage_pct": 68.34,
+      "shortfall_pct": -11.66,
+      "mean_width": 8.0134,
+      "median_width": 9.296
+    },
+    {
+      "month": "August 2023",
+      "lead": "D8",
+      "coverage_pct": 69.13,
+      "shortfall_pct": -10.87,
+      "mean_width": 7.8887,
+      "median_width": 8.632
+    },
+    {
+      "month": "August 2023",
+      "lead": "D9",
+      "coverage_pct": 65.77,
+      "shortfall_pct": -14.23,
+      "mean_width": 7.2366,
+      "median_width": 7.6045
+    },
+    {
+      "month": "September 2023",
+      "lead": "D1",
+      "coverage_pct": 91.02,
+      "shortfall_pct": 11.02,
+      "mean_width": 10.0871,
+      "median_width": 9.8014
+    },
+    {
+      "month": "September 2023",
+      "lead": "D2",
+      "coverage_pct": 88.13,
+      "shortfall_pct": 8.13,
+      "mean_width": 9.8824,
+      "median_width": 9.7119
+    },
+    {
+      "month": "September 2023",
+      "lead": "D3",
+      "coverage_pct": 82.31,
+      "shortfall_pct": 2.31,
+      "mean_width": 9.8068,
+      "median_width": 10.2443
+    },
+    {
+      "month": "September 2023",
+      "lead": "D4",
+      "coverage_pct": 79.2,
+      "shortfall_pct": -0.8,
+      "mean_width": 9.5906,
+      "median_width": 10.6021
+    },
+    {
+      "month": "September 2023",
+      "lead": "D5",
+      "coverage_pct": 75.42,
+      "shortfall_pct": -4.58,
+      "mean_width": 10.8742,
+      "median_width": 11.8865
+    },
+    {
+      "month": "September 2023",
+      "lead": "D6",
+      "coverage_pct": 62.21,
+      "shortfall_pct": -17.79,
+      "mean_width": 10.9033,
+      "median_width": 12.5039
+    },
+    {
+      "month": "September 2023",
+      "lead": "D7",
+      "coverage_pct": 71.83,
+      "shortfall_pct": -8.17,
+      "mean_width": 12.1719,
+      "median_width": 13.7232
+    },
+    {
+      "month": "September 2023",
+      "lead": "D8",
+      "coverage_pct": 67.67,
+      "shortfall_pct": -12.33,
+      "mean_width": 11.0821,
+      "median_width": 12.4132
+    },
+    {
+      "month": "September 2023",
+      "lead": "D9",
+      "coverage_pct": 85.02,
+      "shortfall_pct": 5.02,
+      "mean_width": 9.3205,
+      "median_width": 9.4062
+    }
+  ],
+  "pooled_table_b_conformity_diagnostics": [
+    {
+      "lead": "D1",
+      "calib_median": 2.3578,
+      "calib_p80": 7.2503,
+      "calib_p90": 12.4608,
+      "calib_p95": 20.4525,
+      "calib_max": 271.0448,
+      "test_median": 2.048,
+      "test_p80": 4.709,
+      "test_p90": 8.0568,
+      "test_p95": 12.7379,
+      "test_max": 295.4561
+    },
+    {
+      "lead": "D2",
+      "calib_median": 2.712,
+      "calib_p80": 7.0356,
+      "calib_p90": 12.3047,
+      "calib_p95": 20.3808,
+      "calib_max": 325.9623,
+      "test_median": 2.1586,
+      "test_p80": 4.7573,
+      "test_p90": 8.0012,
+      "test_p95": 12.9603,
+      "test_max": 232.4876
+    },
+    {
+      "lead": "D3",
+      "calib_median": 3.1818,
+      "calib_p80": 7.2815,
+      "calib_p90": 12.2513,
+      "calib_p95": 19.4165,
+      "calib_max": 363.3736,
+      "test_median": 2.6725,
+      "test_p80": 5.5279,
+      "test_p90": 8.5082,
+      "test_p95": 13.2203,
+      "test_max": 318.7591
+    },
+    {
+      "lead": "D4",
+      "calib_median": 3.2406,
+      "calib_p80": 7.0756,
+      "calib_p90": 11.0703,
+      "calib_p95": 17.9116,
+      "calib_max": 362.4566,
+      "test_median": 2.9848,
+      "test_p80": 6.3309,
+      "test_p90": 9.6324,
+      "test_p95": 14.7498,
+      "test_max": 281.5504
+    },
+    {
+      "lead": "D5",
+      "calib_median": 3.3148,
+      "calib_p80": 6.854,
+      "calib_p90": 10.8969,
+      "calib_p95": 17.1529,
+      "calib_max": 322.7064,
+      "test_median": 3.3881,
+      "test_p80": 6.9131,
+      "test_p90": 10.9415,
+      "test_p95": 17.3199,
+      "test_max": 321.8591
+    },
+    {
+      "lead": "D6",
+      "calib_median": 3.243,
+      "calib_p80": 6.4232,
+      "calib_p90": 10.0297,
+      "calib_p95": 15.8581,
+      "calib_max": 368.2612,
+      "test_median": 3.5539,
+      "test_p80": 8.7706,
+      "test_p90": 14.641,
+      "test_p95": 23.9144,
+      "test_max": 279.1963
+    },
+    {
+      "lead": "D7",
+      "calib_median": 3.2519,
+      "calib_p80": 6.1278,
+      "calib_p90": 9.6015,
+      "calib_p95": 15.1422,
+      "calib_max": 258.845,
+      "test_median": 3.3479,
+      "test_p80": 7.45,
+      "test_p90": 12.6227,
+      "test_p95": 19.8795,
+      "test_max": 308.8184
+    },
+    {
+      "lead": "D8",
+      "calib_median": 3.2543,
+      "calib_p80": 6.3053,
+      "calib_p90": 9.8751,
+      "calib_p95": 15.3169,
+      "calib_max": 319.3287,
+      "test_median": 3.3859,
+      "test_p80": 7.9928,
+      "test_p90": 12.8136,
+      "test_p95": 19.6411,
+      "test_max": 222.8993
+    },
+    {
+      "lead": "D9",
+      "calib_median": 3.0397,
+      "calib_p80": 5.9114,
+      "calib_p90": 9.475,
+      "calib_p95": 16.6489,
+      "calib_max": 324.6234,
+      "test_median": 2.7767,
+      "test_p80": 6.1507,
+      "test_p90": 10.619,
+      "test_p95": 17.6755,
+      "test_max": 259.6607
+    }
+  ],
+  "pooled_table_c_rainfall_coverage": [
+    {
+      "lead": "D1",
+      "rainfall_bin": "0-10 mm",
+      "n_samples": 63243,
+      "coverage_pct": 96.38,
+      "mean_width": 11.0349
+    },
+    {
+      "lead": "D1",
+      "rainfall_bin": "10-25 mm",
+      "n_samples": 6225,
+      "coverage_pct": 52.59,
+      "mean_width": 13.7098
+    },
+    {
+      "lead": "D1",
+      "rainfall_bin": "25-50 mm",
+      "n_samples": 2917,
+      "coverage_pct": 26.12,
+      "mean_width": 14.1236
+    },
+    {
+      "lead": "D1",
+      "rainfall_bin": "50-100 mm",
+      "n_samples": 927,
+      "coverage_pct": 6.58,
+      "mean_width": 14.3247
+    },
+    {
+      "lead": "D1",
+      "rainfall_bin": ">100 mm",
+      "n_samples": 263,
+      "coverage_pct": 2.28,
+      "mean_width": 14.4835
+    },
+    {
+      "lead": "D2",
+      "rainfall_bin": "0-10 mm",
+      "n_samples": 64300,
+      "coverage_pct": 95.7,
+      "mean_width": 10.7233
+    },
+    {
+      "lead": "D2",
+      "rainfall_bin": "10-25 mm",
+      "n_samples": 5733,
+      "coverage_pct": 47.1,
+      "mean_width": 13.2504
+    },
+    {
+      "lead": "D2",
+      "rainfall_bin": "25-50 mm",
+      "n_samples": 2547,
+      "coverage_pct": 20.22,
+      "mean_width": 13.596
+    },
+    {
+      "lead": "D2",
+      "rainfall_bin": "50-100 mm",
+      "n_samples": 859,
+      "coverage_pct": 6.17,
+      "mean_width": 13.7501
+    },
+    {
+      "lead": "D2",
+      "rainfall_bin": ">100 mm",
+      "n_samples": 136,
+      "coverage_pct": 2.94,
+      "mean_width": 13.9998
+    },
+    {
+      "lead": "D3",
+      "rainfall_bin": "0-10 mm",
+      "n_samples": 64677,
+      "coverage_pct": 94.1,
+      "mean_width": 11.3741
+    },
+    {
+      "lead": "D3",
+      "rainfall_bin": "10-25 mm",
+      "n_samples": 5463,
+      "coverage_pct": 49.02,
+      "mean_width": 13.7032
+    },
+    {
+      "lead": "D3",
+      "rainfall_bin": "25-50 mm",
+      "n_samples": 2438,
+      "coverage_pct": 21.08,
+      "mean_width": 14.0203
+    },
+    {
+      "lead": "D3",
+      "rainfall_bin": "50-100 mm",
+      "n_samples": 846,
+      "coverage_pct": 8.04,
+      "mean_width": 14.2665
+    },
+    {
+      "lead": "D3",
+      "rainfall_bin": ">100 mm",
+      "n_samples": 151,
+      "coverage_pct": 0.66,
+      "mean_width": 14.4836
+    },
+    {
+      "lead": "D4",
+      "rainfall_bin": "0-10 mm",
+      "n_samples": 63637,
+      "coverage_pct": 90.97,
+      "mean_width": 11.3023
+    },
+    {
+      "lead": "D4",
+      "rainfall_bin": "10-25 mm",
+      "n_samples": 5932,
+      "coverage_pct": 45.01,
+      "mean_width": 13.496
+    },
+    {
+      "lead": "D4",
+      "rainfall_bin": "25-50 mm",
+      "n_samples": 2700,
+      "coverage_pct": 21.37,
+      "mean_width": 13.6154
+    },
+    {
+      "lead": "D4",
+      "rainfall_bin": "50-100 mm",
+      "n_samples": 1079,
+      "coverage_pct": 7.6,
+      "mean_width": 13.854
+    },
+    {
+      "lead": "D4",
+      "rainfall_bin": ">100 mm",
+      "n_samples": 227,
+      "coverage_pct": 2.2,
+      "mean_width": 14.0467
+    },
+    {
+      "lead": "D5",
+      "rainfall_bin": "0-10 mm",
+      "n_samples": 62218,
+      "coverage_pct": 88.76,
+      "mean_width": 11.2876
+    },
+    {
+      "lead": "D5",
+      "rainfall_bin": "10-25 mm",
+      "n_samples": 6499,
+      "coverage_pct": 42.01,
+      "mean_width": 13.2034
+    },
+    {
+      "lead": "D5",
+      "rainfall_bin": "25-50 mm",
+      "n_samples": 3212,
+      "coverage_pct": 19.15,
+      "mean_width": 13.3247
+    },
+    {
+      "lead": "D5",
+      "rainfall_bin": "50-100 mm",
+      "n_samples": 1352,
+      "coverage_pct": 7.32,
+      "mean_width": 13.524
+    },
+    {
+      "lead": "D5",
+      "rainfall_bin": ">100 mm",
+      "n_samples": 294,
+      "coverage_pct": 2.38,
+      "mean_width": 13.647
+    },
+    {
+      "lead": "D6",
+      "rainfall_bin": "0-10 mm",
+      "n_samples": 61566,
+      "coverage_pct": 79.56,
+      "mean_width": 10.8956
+    },
+    {
+      "lead": "D6",
+      "rainfall_bin": "10-25 mm",
+      "n_samples": 6876,
+      "coverage_pct": 42.7,
+      "mean_width": 12.3955
+    },
+    {
+      "lead": "D6",
+      "rainfall_bin": "25-50 mm",
+      "n_samples": 3396,
+      "coverage_pct": 18.37,
+      "mean_width": 12.5223
+    },
+    {
+      "lead": "D6",
+      "rainfall_bin": "50-100 mm",
+      "n_samples": 1430,
+      "coverage_pct": 5.03,
+      "mean_width": 12.6456
+    },
+    {
+      "lead": "D6",
+      "rainfall_bin": ">100 mm",
+      "n_samples": 307,
+      "coverage_pct": 1.95,
+      "mean_width": 12.7921
+    },
+    {
+      "lead": "D7",
+      "rainfall_bin": "0-10 mm",
+      "n_samples": 61345,
+      "coverage_pct": 84.12,
+      "mean_width": 10.2724
+    },
+    {
+      "lead": "D7",
+      "rainfall_bin": "10-25 mm",
+      "n_samples": 7112,
+      "coverage_pct": 39.22,
+      "mean_width": 11.8948
+    },
+    {
+      "lead": "D7",
+      "rainfall_bin": "25-50 mm",
+      "n_samples": 3485,
+      "coverage_pct": 16.59,
+      "mean_width": 12.037
+    },
+    {
+      "lead": "D7",
+      "rainfall_bin": "50-100 mm",
+      "n_samples": 1338,
+      "coverage_pct": 5.01,
+      "mean_width": 12.0954
+    },
+    {
+      "lead": "D7",
+      "rainfall_bin": ">100 mm",
+      "n_samples": 295,
+      "coverage_pct": 2.37,
+      "mean_width": 12.2478
+    },
+    {
+      "lead": "D8",
+      "rainfall_bin": "0-10 mm",
+      "n_samples": 61155,
+      "coverage_pct": 82.87,
+      "mean_width": 10.4671
+    },
+    {
+      "lead": "D8",
+      "rainfall_bin": "10-25 mm",
+      "n_samples": 7507,
+      "coverage_pct": 39.54,
+      "mean_width": 12.255
+    },
+    {
+      "lead": "D8",
+      "rainfall_bin": "25-50 mm",
+      "n_samples": 3476,
+      "coverage_pct": 15.56,
+      "mean_width": 12.3019
+    },
+    {
+      "lead": "D8",
+      "rainfall_bin": "50-100 mm",
+      "n_samples": 1231,
+      "coverage_pct": 4.22,
+      "mean_width": 12.3812
+    },
+    {
+      "lead": "D8",
+      "rainfall_bin": ">100 mm",
+      "n_samples": 206,
+      "coverage_pct": 0.0,
+      "mean_width": 12.5449
+    },
+    {
+      "lead": "D9",
+      "rainfall_bin": "0-10 mm",
+      "n_samples": 61655,
+      "coverage_pct": 89.35,
+      "mean_width": 9.5464
+    },
+    {
+      "lead": "D9",
+      "rainfall_bin": "10-25 mm",
+      "n_samples": 7323,
+      "coverage_pct": 33.95,
+      "mean_width": 11.3167
+    },
+    {
+      "lead": "D9",
+      "rainfall_bin": "25-50 mm",
+      "n_samples": 3436,
+      "coverage_pct": 13.36,
+      "mean_width": 11.3361
+    },
+    {
+      "lead": "D9",
+      "rainfall_bin": "50-100 mm",
+      "n_samples": 1009,
+      "coverage_pct": 3.17,
+      "mean_width": 11.3754
+    },
+    {
+      "lead": "D9",
+      "rainfall_bin": ">100 mm",
+      "n_samples": 152,
+      "coverage_pct": 1.32,
+      "mean_width": 11.7305
+    }
+  ],
+  "pooled_coverage_trend_summary": [
+    {
+      "lead": "D1",
+      "coverage_pct": 88.43,
+      "shortfall_pct": 8.43,
+      "classification": "at or above nominal"
+    },
+    {
+      "lead": "D2",
+      "coverage_pct": 88.08,
+      "shortfall_pct": 8.08,
+      "classification": "at or above nominal"
+    },
+    {
+      "lead": "D3",
+      "coverage_pct": 87.15,
+      "shortfall_pct": 7.15,
+      "classification": "at or above nominal"
+    },
+    {
+      "lead": "D4",
+      "coverage_pct": 83.21,
+      "shortfall_pct": 3.21,
+      "classification": "at or above nominal"
+    },
+    {
+      "lead": "D5",
+      "coverage_pct": 79.75,
+      "shortfall_pct": -0.25,
+      "classification": "modestly below nominal"
+    },
+    {
+      "lead": "D6",
+      "coverage_pct": 71.52,
+      "shortfall_pct": -8.48,
+      "classification": "materially below nominal"
+    },
+    {
+      "lead": "D7",
+      "coverage_pct": 74.81,
+      "shortfall_pct": -5.19,
+      "classification": "materially below nominal"
+    },
+    {
+      "lead": "D8",
+      "coverage_pct": 73.72,
+      "shortfall_pct": -6.28,
+      "classification": "materially below nominal"
+    },
+    {
+      "lead": "D9",
+      "coverage_pct": 78.92,
+      "shortfall_pct": -1.08,
+      "classification": "modestly below nominal"
+    }
+  ],
+  "monthly_models": {
+    "july": {
+      "d1": {
+        "empirical_coverage_pct": 84.19,
+        "coverage_shortfall_pct": 4.19,
+        "mean_interval_width": 16.4212,
+        "median_interval_width": 17.8553,
+        "calib_conformity_scores": {
+          "median": 3.247,
+          "p80": 9.7002,
+          "p90": 16.1674,
+          "p95": 25.7691,
+          "max": 266.5727
+        },
+        "test_error_scores": {
+          "median": 3.7346,
+          "p80": 8.2869,
+          "p90": 12.7441,
+          "p95": 19.4636,
+          "max": 297.6641
+        }
+      },
+      "d2": {
+        "empirical_coverage_pct": 81.4,
+        "coverage_shortfall_pct": 1.4,
+        "mean_interval_width": 15.9897,
+        "median_interval_width": 17.7129,
+        "calib_conformity_scores": {
+          "median": 3.6133,
+          "p80": 9.1529,
+          "p90": 15.2812,
+          "p95": 25.1737,
+          "max": 320.5691
+        },
+        "test_error_scores": {
+          "median": 4.3118,
+          "p80": 8.7951,
+          "p90": 12.863,
+          "p95": 18.6886,
+          "max": 230.6927
+        }
+      },
+      "d3": {
+        "empirical_coverage_pct": 78.29,
+        "coverage_shortfall_pct": -1.71,
+        "mean_interval_width": 17.5764,
+        "median_interval_width": 19.0802,
+        "calib_conformity_scores": {
+          "median": 4.4671,
+          "p80": 10.1583,
+          "p90": 16.3967,
+          "p95": 26.4806,
+          "max": 364.2384
+        },
+        "test_error_scores": {
+          "median": 4.8207,
+          "p80": 10.8109,
+          "p90": 16.4472,
+          "p95": 22.5935,
+          "max": 318.3211
+        }
+      },
+      "d4": {
+        "empirical_coverage_pct": 83.47,
+        "coverage_shortfall_pct": 3.47,
+        "mean_interval_width": 20.4134,
+        "median_interval_width": 21.5176,
+        "calib_conformity_scores": {
+          "median": 4.9839,
+          "p80": 12.1537,
+          "p90": 19.5397,
+          "p95": 28.4208,
+          "max": 358.2544
+        },
+        "test_error_scores": {
+          "median": 5.0692,
+          "p80": 10.8638,
+          "p90": 15.9156,
+          "p95": 22.2007,
+          "max": 283.0379
+        }
+      },
+      "d5": {
+        "empirical_coverage_pct": 80.42,
+        "coverage_shortfall_pct": 0.42,
+        "mean_interval_width": 20.1723,
+        "median_interval_width": 21.6243,
+        "calib_conformity_scores": {
+          "median": 5.0472,
+          "p80": 11.7381,
+          "p90": 18.7525,
+          "p95": 30.2061,
+          "max": 321.7907
+        },
+        "test_error_scores": {
+          "median": 5.1177,
+          "p80": 11.6131,
+          "p90": 17.3328,
+          "p95": 26.222,
+          "max": 322.072
+        }
+      },
+      "d6": {
+        "empirical_coverage_pct": 79.73,
+        "coverage_shortfall_pct": -0.27,
+        "mean_interval_width": 18.0871,
+        "median_interval_width": 19.8209,
+        "calib_conformity_scores": {
+          "median": 4.7007,
+          "p80": 10.5255,
+          "p90": 15.9775,
+          "p95": 24.3214,
+          "max": 363.5885
+        },
+        "test_error_scores": {
+          "median": 4.6803,
+          "p80": 10.6338,
+          "p90": 18.6449,
+          "p95": 28.8474,
+          "max": 277.5524
+        }
+      },
+      "d7": {
+        "empirical_coverage_pct": 82.36,
+        "coverage_shortfall_pct": 2.36,
+        "mean_interval_width": 18.019,
+        "median_interval_width": 19.1588,
+        "calib_conformity_scores": {
+          "median": 4.9673,
+          "p80": 10.4851,
+          "p90": 14.9914,
+          "p95": 20.8287,
+          "max": 228.1678
+        },
+        "test_error_scores": {
+          "median": 4.8901,
+          "p80": 9.7151,
+          "p90": 14.3812,
+          "p95": 22.9699,
+          "max": 312.9114
+        }
+      },
+      "d8": {
+        "empirical_coverage_pct": 78.58,
+        "coverage_shortfall_pct": -1.42,
+        "mean_interval_width": 17.58,
+        "median_interval_width": 19.4236,
+        "calib_conformity_scores": {
+          "median": 4.5258,
+          "p80": 9.9613,
+          "p90": 16.0342,
+          "p95": 23.5816,
+          "max": 316.9739
+        },
+        "test_error_scores": {
+          "median": 5.4985,
+          "p80": 10.3029,
+          "p90": 14.8228,
+          "p95": 23.1297,
+          "max": 223.0406
+        }
+      },
+      "d9": {
+        "empirical_coverage_pct": 79.3,
+        "coverage_shortfall_pct": -0.7,
+        "mean_interval_width": 15.6718,
+        "median_interval_width": 17.6365,
+        "calib_conformity_scores": {
+          "median": 4.2327,
+          "p80": 8.8464,
+          "p90": 14.2834,
+          "p95": 23.422,
+          "max": 320.5398
+        },
+        "test_error_scores": {
+          "median": 4.992,
+          "p80": 8.9848,
+          "p90": 12.5326,
+          "p95": 19.8565,
+          "max": 258.9458
+        }
+      }
+    },
+    "august": {
+      "d1": {
+        "empirical_coverage_pct": 90.99,
+        "coverage_shortfall_pct": 10.99,
+        "mean_interval_width": 8.722,
+        "median_interval_width": 8.2566,
+        "calib_conformity_scores": {
+          "median": 1.0837,
+          "p80": 5.9304,
+          "p90": 10.8429,
+          "p95": 17.8927,
+          "max": 197.463
+        },
+        "test_error_scores": {
+          "median": 1.2004,
+          "p80": 3.5953,
+          "p90": 5.5662,
+          "p95": 8.7343,
+          "max": 224.2881
+        }
+      },
+      "d2": {
+        "empirical_coverage_pct": 93.24,
+        "coverage_shortfall_pct": 13.24,
+        "mean_interval_width": 8.0687,
+        "median_interval_width": 7.3212,
+        "calib_conformity_scores": {
+          "median": 1.2225,
+          "p80": 5.7333,
+          "p90": 11.2723,
+          "p95": 18.4204,
+          "max": 202.0161
+        },
+        "test_error_scores": {
+          "median": 1.0416,
+          "p80": 2.5971,
+          "p90": 4.338,
+          "p95": 7.2396,
+          "max": 229.225
+        }
+      },
+      "d3": {
+        "empirical_coverage_pct": 90.37,
+        "coverage_shortfall_pct": 10.37,
+        "mean_interval_width": 7.8174,
+        "median_interval_width": 7.7298,
+        "calib_conformity_scores": {
+          "median": 1.3714,
+          "p80": 5.211,
+          "p90": 10.0779,
+          "p95": 16.2744,
+          "max": 268.0129
+        },
+        "test_error_scores": {
+          "median": 1.5341,
+          "p80": 3.5783,
+          "p90": 5.1077,
+          "p95": 7.5679,
+          "max": 129.3587
+        }
+      },
+      "d4": {
+        "empirical_coverage_pct": 80.27,
+        "coverage_shortfall_pct": 0.27,
+        "mean_interval_width": 7.9565,
+        "median_interval_width": 8.1895,
+        "calib_conformity_scores": {
+          "median": 1.5624,
+          "p80": 4.9485,
+          "p90": 8.7832,
+          "p95": 14.297,
+          "max": 234.2328
+        },
+        "test_error_scores": {
+          "median": 2.1854,
+          "p80": 4.9113,
+          "p90": 6.7218,
+          "p95": 9.6522,
+          "max": 140.064
+        }
+      },
+      "d5": {
+        "empirical_coverage_pct": 80.91,
+        "coverage_shortfall_pct": 0.91,
+        "mean_interval_width": 10.4663,
+        "median_interval_width": 11.0057,
+        "calib_conformity_scores": {
+          "median": 2.0145,
+          "p80": 6.44,
+          "p90": 9.9853,
+          "p95": 15.3941,
+          "max": 285.4422
+        },
+        "test_error_scores": {
+          "median": 2.9762,
+          "p80": 6.2677,
+          "p90": 9.7385,
+          "p95": 14.7568,
+          "max": 135.2749
+        }
+      },
+      "d6": {
+        "empirical_coverage_pct": 72.36,
+        "coverage_shortfall_pct": -7.64,
+        "mean_interval_width": 9.8238,
+        "median_interval_width": 10.6987,
+        "calib_conformity_scores": {
+          "median": 1.9901,
+          "p80": 5.9149,
+          "p90": 9.2552,
+          "p95": 13.9964,
+          "max": 301.1732
+        },
+        "test_error_scores": {
+          "median": 3.0161,
+          "p80": 7.9027,
+          "p90": 13.0556,
+          "p95": 19.7205,
+          "max": 144.0597
+        }
+      },
+      "d7": {
+        "empirical_coverage_pct": 68.34,
+        "coverage_shortfall_pct": -11.66,
+        "mean_interval_width": 8.0134,
+        "median_interval_width": 9.296,
+        "calib_conformity_scores": {
+          "median": 1.7727,
+          "p80": 4.647,
+          "p90": 6.9444,
+          "p95": 10.9566,
+          "max": 246.3249
+        },
+        "test_error_scores": {
+          "median": 2.6737,
+          "p80": 7.1112,
+          "p90": 11.6541,
+          "p95": 17.7928,
+          "max": 145.0757
+        }
+      },
+      "d8": {
+        "empirical_coverage_pct": 69.13,
+        "coverage_shortfall_pct": -10.87,
+        "mean_interval_width": 7.8887,
+        "median_interval_width": 8.632,
+        "calib_conformity_scores": {
+          "median": 1.6345,
+          "p80": 4.7193,
+          "p90": 7.95,
+          "p95": 12.1618,
+          "max": 142.7437
+        },
+        "test_error_scores": {
+          "median": 2.5921,
+          "p80": 7.0114,
+          "p90": 12.1437,
+          "p95": 19.6451,
+          "max": 149.6098
+        }
+      },
+      "d9": {
+        "empirical_coverage_pct": 65.77,
+        "coverage_shortfall_pct": -14.23,
+        "mean_interval_width": 7.2366,
+        "median_interval_width": 7.6045,
+        "calib_conformity_scores": {
+          "median": 1.6278,
+          "p80": 4.4362,
+          "p90": 7.2166,
+          "p95": 11.8349,
+          "max": 151.4101
+        },
+        "test_error_scores": {
+          "median": 2.3668,
+          "p80": 8.2869,
+          "p90": 14.497,
+          "p95": 23.0509,
+          "max": 143.9522
+        }
+      }
+    },
+    "september": {
+      "d1": {
+        "empirical_coverage_pct": 91.02,
+        "coverage_shortfall_pct": 11.02,
+        "mean_interval_width": 10.0871,
+        "median_interval_width": 9.8014,
+        "calib_conformity_scores": {
+          "median": 2.3211,
+          "p80": 6.592,
+          "p90": 11.3196,
+          "p95": 19.0231,
+          "max": 257.3413
+        },
+        "test_error_scores": {
+          "median": 1.366,
+          "p80": 3.5469,
+          "p90": 6.1731,
+          "p95": 9.6116,
+          "max": 94.0957
+        }
+      },
+      "d2": {
+        "empirical_coverage_pct": 88.13,
+        "coverage_shortfall_pct": 8.13,
+        "mean_interval_width": 9.8824,
+        "median_interval_width": 9.7119,
+        "calib_conformity_scores": {
+          "median": 2.5877,
+          "p80": 6.3841,
+          "p90": 11.0052,
+          "p95": 18.3764,
+          "max": 245.2921
+        },
+        "test_error_scores": {
+          "median": 1.7602,
+          "p80": 4.1132,
+          "p90": 7.2592,
+          "p95": 11.453,
+          "max": 154.535
+        }
+      },
+      "d3": {
+        "empirical_coverage_pct": 82.31,
+        "coverage_shortfall_pct": 2.31,
+        "mean_interval_width": 9.8068,
+        "median_interval_width": 10.2443,
+        "calib_conformity_scores": {
+          "median": 2.7538,
+          "p80": 6.0708,
+          "p90": 9.9249,
+          "p95": 16.313,
+          "max": 282.711
+        },
+        "test_error_scores": {
+          "median": 2.3118,
+          "p80": 5.5599,
+          "p90": 8.9386,
+          "p95": 13.985,
+          "max": 144.3046
+        }
+      },
+      "d4": {
+        "empirical_coverage_pct": 79.2,
+        "coverage_shortfall_pct": -0.8,
+        "mean_interval_width": 9.5906,
+        "median_interval_width": 10.6021,
+        "calib_conformity_scores": {
+          "median": 2.8499,
+          "p80": 5.7581,
+          "p90": 9.4426,
+          "p95": 14.4958,
+          "max": 201.6371
+        },
+        "test_error_scores": {
+          "median": 2.7478,
+          "p80": 5.9285,
+          "p90": 9.8318,
+          "p95": 15.8954,
+          "max": 249.1913
+        }
+      },
+      "d5": {
+        "empirical_coverage_pct": 75.42,
+        "coverage_shortfall_pct": -4.58,
+        "mean_interval_width": 10.8742,
+        "median_interval_width": 11.8865,
+        "calib_conformity_scores": {
+          "median": 3.2382,
+          "p80": 6.4879,
+          "p90": 8.9708,
+          "p95": 12.7004,
+          "max": 132.7002
+        },
+        "test_error_scores": {
+          "median": 3.2763,
+          "p80": 7.5613,
+          "p90": 11.7305,
+          "p95": 19.0673,
+          "max": 226.9187
+        }
+      },
+      "d6": {
+        "empirical_coverage_pct": 62.21,
+        "coverage_shortfall_pct": -17.79,
+        "mean_interval_width": 10.9033,
+        "median_interval_width": 12.5039,
+        "calib_conformity_scores": {
+          "median": 3.1951,
+          "p80": 6.2517,
+          "p90": 9.3011,
+          "p95": 13.3589,
+          "max": 92.6297
+        },
+        "test_error_scores": {
+          "median": 4.3058,
+          "p80": 10.3948,
+          "p90": 16.395,
+          "p95": 23.368,
+          "max": 179.9726
+        }
+      },
+      "d7": {
+        "empirical_coverage_pct": 71.83,
+        "coverage_shortfall_pct": -8.17,
+        "mean_interval_width": 12.1719,
+        "median_interval_width": 13.7232,
+        "calib_conformity_scores": {
+          "median": 3.3968,
+          "p80": 7.3286,
+          "p90": 12.4722,
+          "p95": 21.7737,
+          "max": 167.3431
+        },
+        "test_error_scores": {
+          "median": 3.9141,
+          "p80": 9.3343,
+          "p90": 14.0401,
+          "p95": 20.9364,
+          "max": 171.6423
+        }
+      },
+      "d8": {
+        "empirical_coverage_pct": 67.67,
+        "coverage_shortfall_pct": -12.33,
+        "mean_interval_width": 11.0821,
+        "median_interval_width": 12.4132,
+        "calib_conformity_scores": {
+          "median": 2.918,
+          "p80": 6.7151,
+          "p90": 9.8246,
+          "p95": 16.323,
+          "max": 166.55
+        },
+        "test_error_scores": {
+          "median": 4.1223,
+          "p80": 9.5016,
+          "p90": 13.4375,
+          "p95": 18.1146,
+          "max": 220.4723
+        }
+      },
+      "d9": {
+        "empirical_coverage_pct": 85.02,
+        "coverage_shortfall_pct": 5.02,
+        "mean_interval_width": 9.3205,
+        "median_interval_width": 9.4062,
+        "calib_conformity_scores": {
+          "median": 2.9653,
+          "p80": 5.8888,
+          "p90": 9.708,
+          "p95": 17.7385,
+          "max": 162.1257
+        },
+        "test_error_scores": {
+          "median": 2.8608,
+          "p80": 4.9612,
+          "p90": 7.4652,
+          "p95": 12.3707,
+          "max": 207.9311
+        }
+      }
+    }
+  },
+  "pooled_models": {
+    "d1": {
+      "empirical_coverage_pct": 88.43,
+      "coverage_shortfall_pct": 8.43,
+      "mean_interval_width": 11.4374,
+      "median_interval_width": 11.2988,
+      "calib_conformity_scores": {
+        "median": 2.3578,
+        "p80": 7.2503,
+        "p90": 12.4608,
+        "p95": 20.4525,
+        "max": 271.0448
+      },
+      "test_error_scores": {
+        "median": 2.048,
+        "p80": 4.709,
+        "p90": 8.0568,
+        "p95": 12.7379,
+        "max": 295.4561
+      },
+      "rainfall_conditioned_coverage": {
+        "0-10 mm": {
+          "n_samples": 63243,
+          "coverage_pct": 96.38,
+          "mean_interval_width": 11.0349
+        },
+        "10-25 mm": {
+          "n_samples": 6225,
+          "coverage_pct": 52.59,
+          "mean_interval_width": 13.7098
+        },
+        "25-50 mm": {
+          "n_samples": 2917,
+          "coverage_pct": 26.12,
+          "mean_interval_width": 14.1236
+        },
+        "50-100 mm": {
+          "n_samples": 927,
+          "coverage_pct": 6.58,
+          "mean_interval_width": 14.3247
+        },
+        ">100 mm": {
+          "n_samples": 263,
+          "coverage_pct": 2.28,
+          "mean_interval_width": 14.4835
+        }
+      }
+    },
+    "d2": {
+      "empirical_coverage_pct": 88.08,
+      "coverage_shortfall_pct": 8.08,
+      "mean_interval_width": 11.061,
+      "median_interval_width": 10.8758,
+      "calib_conformity_scores": {
+        "median": 2.712,
+        "p80": 7.0356,
+        "p90": 12.3047,
+        "p95": 20.3808,
+        "max": 325.9623
+      },
+      "test_error_scores": {
+        "median": 2.1586,
+        "p80": 4.7573,
+        "p90": 8.0012,
+        "p95": 12.9603,
+        "max": 232.4876
+      },
+      "rainfall_conditioned_coverage": {
+        "0-10 mm": {
+          "n_samples": 64300,
+          "coverage_pct": 95.7,
+          "mean_interval_width": 10.7233
+        },
+        "10-25 mm": {
+          "n_samples": 5733,
+          "coverage_pct": 47.1,
+          "mean_interval_width": 13.2504
+        },
+        "25-50 mm": {
+          "n_samples": 2547,
+          "coverage_pct": 20.22,
+          "mean_interval_width": 13.596
+        },
+        "50-100 mm": {
+          "n_samples": 859,
+          "coverage_pct": 6.17,
+          "mean_interval_width": 13.7501
+        },
+        ">100 mm": {
+          "n_samples": 136,
+          "coverage_pct": 2.94,
+          "mean_interval_width": 13.9998
+        }
+      }
+    },
+    "d3": {
+      "empirical_coverage_pct": 87.15,
+      "coverage_shortfall_pct": 7.15,
+      "mean_interval_width": 11.6744,
+      "median_interval_width": 11.8213,
+      "calib_conformity_scores": {
+        "median": 3.1818,
+        "p80": 7.2815,
+        "p90": 12.2513,
+        "p95": 19.4165,
+        "max": 363.3736
+      },
+      "test_error_scores": {
+        "median": 2.6725,
+        "p80": 5.5279,
+        "p90": 8.5082,
+        "p95": 13.2203,
+        "max": 318.7591
+      },
+      "rainfall_conditioned_coverage": {
+        "0-10 mm": {
+          "n_samples": 64677,
+          "coverage_pct": 94.1,
+          "mean_interval_width": 11.3741
+        },
+        "10-25 mm": {
+          "n_samples": 5463,
+          "coverage_pct": 49.02,
+          "mean_interval_width": 13.7032
+        },
+        "25-50 mm": {
+          "n_samples": 2438,
+          "coverage_pct": 21.08,
+          "mean_interval_width": 14.0203
+        },
+        "50-100 mm": {
+          "n_samples": 846,
+          "coverage_pct": 8.04,
+          "mean_interval_width": 14.2665
+        },
+        ">100 mm": {
+          "n_samples": 151,
+          "coverage_pct": 0.66,
+          "mean_interval_width": 14.4836
+        }
+      }
+    },
+    "d4": {
+      "empirical_coverage_pct": 83.21,
+      "coverage_shortfall_pct": 3.21,
+      "mean_interval_width": 11.6099,
+      "median_interval_width": 12.1803,
+      "calib_conformity_scores": {
+        "median": 3.2406,
+        "p80": 7.0756,
+        "p90": 11.0703,
+        "p95": 17.9116,
+        "max": 362.4566
+      },
+      "test_error_scores": {
+        "median": 2.9848,
+        "p80": 6.3309,
+        "p90": 9.6324,
+        "p95": 14.7498,
+        "max": 281.5504
+      },
+      "rainfall_conditioned_coverage": {
+        "0-10 mm": {
+          "n_samples": 63637,
+          "coverage_pct": 90.97,
+          "mean_interval_width": 11.3023
+        },
+        "10-25 mm": {
+          "n_samples": 5932,
+          "coverage_pct": 45.01,
+          "mean_interval_width": 13.496
+        },
+        "25-50 mm": {
+          "n_samples": 2700,
+          "coverage_pct": 21.37,
+          "mean_interval_width": 13.6154
+        },
+        "50-100 mm": {
+          "n_samples": 1079,
+          "coverage_pct": 7.6,
+          "mean_interval_width": 13.854
+        },
+        ">100 mm": {
+          "n_samples": 227,
+          "coverage_pct": 2.2,
+          "mean_interval_width": 14.0467
+        }
+      }
+    },
+    "d5": {
+      "empirical_coverage_pct": 79.75,
+      "coverage_shortfall_pct": -0.25,
+      "mean_interval_width": 11.5963,
+      "median_interval_width": 12.3914,
+      "calib_conformity_scores": {
+        "median": 3.3148,
+        "p80": 6.854,
+        "p90": 10.8969,
+        "p95": 17.1529,
+        "max": 322.7064
+      },
+      "test_error_scores": {
+        "median": 3.3881,
+        "p80": 6.9131,
+        "p90": 10.9415,
+        "p95": 17.3199,
+        "max": 321.8591
+      },
+      "rainfall_conditioned_coverage": {
+        "0-10 mm": {
+          "n_samples": 62218,
+          "coverage_pct": 88.76,
+          "mean_interval_width": 11.2876
+        },
+        "10-25 mm": {
+          "n_samples": 6499,
+          "coverage_pct": 42.01,
+          "mean_interval_width": 13.2034
+        },
+        "25-50 mm": {
+          "n_samples": 3212,
+          "coverage_pct": 19.15,
+          "mean_interval_width": 13.3247
+        },
+        "50-100 mm": {
+          "n_samples": 1352,
+          "coverage_pct": 7.32,
+          "mean_interval_width": 13.524
+        },
+        ">100 mm": {
+          "n_samples": 294,
+          "coverage_pct": 2.38,
+          "mean_interval_width": 13.647
+        }
+      }
+    },
+    "d6": {
+      "empirical_coverage_pct": 71.52,
+      "coverage_shortfall_pct": -8.48,
+      "mean_interval_width": 11.1528,
+      "median_interval_width": 12.8473,
+      "calib_conformity_scores": {
+        "median": 3.243,
+        "p80": 6.4232,
+        "p90": 10.0297,
+        "p95": 15.8581,
+        "max": 368.2612
+      },
+      "test_error_scores": {
+        "median": 3.5539,
+        "p80": 8.7706,
+        "p90": 14.641,
+        "p95": 23.9144,
+        "max": 279.1963
+      },
+      "rainfall_conditioned_coverage": {
+        "0-10 mm": {
+          "n_samples": 61566,
+          "coverage_pct": 79.56,
+          "mean_interval_width": 10.8956
+        },
+        "10-25 mm": {
+          "n_samples": 6876,
+          "coverage_pct": 42.7,
+          "mean_interval_width": 12.3955
+        },
+        "25-50 mm": {
+          "n_samples": 3396,
+          "coverage_pct": 18.37,
+          "mean_interval_width": 12.5223
+        },
+        "50-100 mm": {
+          "n_samples": 1430,
+          "coverage_pct": 5.03,
+          "mean_interval_width": 12.6456
+        },
+        ">100 mm": {
+          "n_samples": 307,
+          "coverage_pct": 1.95,
+          "mean_interval_width": 12.7921
+        }
+      }
+    },
+    "d7": {
+      "empirical_coverage_pct": 74.81,
+      "coverage_shortfall_pct": -5.19,
+      "mean_interval_width": 10.5539,
+      "median_interval_width": 11.8005,
+      "calib_conformity_scores": {
+        "median": 3.2519,
+        "p80": 6.1278,
+        "p90": 9.6015,
+        "p95": 15.1422,
+        "max": 258.845
+      },
+      "test_error_scores": {
+        "median": 3.3479,
+        "p80": 7.45,
+        "p90": 12.6227,
+        "p95": 19.8795,
+        "max": 308.8184
+      },
+      "rainfall_conditioned_coverage": {
+        "0-10 mm": {
+          "n_samples": 61345,
+          "coverage_pct": 84.12,
+          "mean_interval_width": 10.2724
+        },
+        "10-25 mm": {
+          "n_samples": 7112,
+          "coverage_pct": 39.22,
+          "mean_interval_width": 11.8948
+        },
+        "25-50 mm": {
+          "n_samples": 3485,
+          "coverage_pct": 16.59,
+          "mean_interval_width": 12.037
+        },
+        "50-100 mm": {
+          "n_samples": 1338,
+          "coverage_pct": 5.01,
+          "mean_interval_width": 12.0954
+        },
+        ">100 mm": {
+          "n_samples": 295,
+          "coverage_pct": 2.37,
+          "mean_interval_width": 12.2478
+        }
+      }
+    },
+    "d8": {
+      "empirical_coverage_pct": 73.72,
+      "coverage_shortfall_pct": -6.28,
+      "mean_interval_width": 10.774,
+      "median_interval_width": 11.9075,
+      "calib_conformity_scores": {
+        "median": 3.2543,
+        "p80": 6.3053,
+        "p90": 9.8751,
+        "p95": 15.3169,
+        "max": 319.3287
+      },
+      "test_error_scores": {
+        "median": 3.3859,
+        "p80": 7.9928,
+        "p90": 12.8136,
+        "p95": 19.6411,
+        "max": 222.8993
+      },
+      "rainfall_conditioned_coverage": {
+        "0-10 mm": {
+          "n_samples": 61155,
+          "coverage_pct": 82.87,
+          "mean_interval_width": 10.4671
+        },
+        "10-25 mm": {
+          "n_samples": 7507,
+          "coverage_pct": 39.54,
+          "mean_interval_width": 12.255
+        },
+        "25-50 mm": {
+          "n_samples": 3476,
+          "coverage_pct": 15.56,
+          "mean_interval_width": 12.3019
+        },
+        "50-100 mm": {
+          "n_samples": 1231,
+          "coverage_pct": 4.22,
+          "mean_interval_width": 12.3812
+        },
+        ">100 mm": {
+          "n_samples": 206,
+          "coverage_pct": 0.0,
+          "mean_interval_width": 12.5449
+        }
+      }
+    },
+    "d9": {
+      "empirical_coverage_pct": 78.92,
+      "coverage_shortfall_pct": -1.08,
+      "mean_interval_width": 9.8358,
+      "median_interval_width": 10.3306,
+      "calib_conformity_scores": {
+        "median": 3.0397,
+        "p80": 5.9114,
+        "p90": 9.475,
+        "p95": 16.6489,
+        "max": 324.6234
+      },
+      "test_error_scores": {
+        "median": 2.7767,
+        "p80": 6.1507,
+        "p90": 10.619,
+        "p95": 17.6755,
+        "max": 259.6607
+      },
+      "rainfall_conditioned_coverage": {
+        "0-10 mm": {
+          "n_samples": 61655,
+          "coverage_pct": 89.35,
+          "mean_interval_width": 9.5464
+        },
+        "10-25 mm": {
+          "n_samples": 7323,
+          "coverage_pct": 33.95,
+          "mean_interval_width": 11.3167
+        },
+        "25-50 mm": {
+          "n_samples": 3436,
+          "coverage_pct": 13.36,
+          "mean_interval_width": 11.3361
+        },
+        "50-100 mm": {
+          "n_samples": 1009,
+          "coverage_pct": 3.17,
+          "mean_interval_width": 11.3754
+        },
+        ">100 mm": {
+          "n_samples": 152,
+          "coverage_pct": 1.32,
+          "mean_interval_width": 11.7305
+        }
+      }
+    }
+  }
+}
