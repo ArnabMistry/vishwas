@@ -137,10 +137,10 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: Operational Clocks, Lead Time Badge & Telemetry Button */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="px-2 sm:px-2.5 py-1 bg-slate-900 border border-slate-700 rounded-sm font-mono text-xs flex items-center gap-1.5 sm:gap-2">
-            <span className="text-slate-400 text-[10px] sm:text-[11px] hidden xs:inline">ACTIVE:</span>
-            <span className="text-primary font-bold text-xs sm:text-sm">D+{leadTime}</span>
-            <span className="text-slate-500 text-[9px] sm:text-[10px]">({leadTime * 24}h)</span>
+          <div className="px-2.5 sm:px-3 py-1 bg-slate-900/95 border border-primary/40 shadow-[0_0_12px_rgba(56,189,248,0.15)] rounded-sm font-mono text-xs flex items-center gap-1.5 sm:gap-2">
+            <span className="text-slate-400 text-[10px] sm:text-[11px] hidden xs:inline font-semibold">LEAD:</span>
+            <span className="text-primary font-black text-xs sm:text-sm">D+{leadTime}</span>
+            <span className="text-slate-400 text-[9px] sm:text-[10px] font-semibold">({leadTime * 24}h)</span>
           </div>
 
           <div className="hidden lg:flex flex-col items-end font-mono text-[10px] sm:text-[11px] leading-tight px-2 py-0.5 bg-slate-900/60 border border-slate-800 rounded-sm">

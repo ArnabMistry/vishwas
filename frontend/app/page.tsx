@@ -270,6 +270,7 @@ export default function Home() {
           }}
           leadTime={leadTime}
           isRealMode={isRealMode}
+          isLoading={isLoading}
         />
 
         {/* Bottom Overlay: Interactive Lead Time Scrubbing Timeline */}

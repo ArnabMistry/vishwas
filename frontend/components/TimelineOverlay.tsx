@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Play, Pause, ChevronLeft, ChevronRight, AlertTriangle, Layers } from "lucide-react";
+import { Play, Pause, ChevronLeft, ChevronRight, AlertTriangle, Layers, RefreshCw } from "lucide-react";
 
 interface TimelineOverlayProps {
   leadTime: number;
@@ -92,12 +92,21 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
           </button>
         </div>
 
-        {/* Center: Lead Time display with D+5 Highlight in DEMO */}
+        {/* Center: Lead Time display with Horizon & Progress */}
         <div className="flex items-center gap-1.5 sm:gap-2 font-mono text-[10px] sm:text-[11px]">
-          <span className="text-slate-400">FORECAST LEAD:</span>
-          <span className="text-[11px] sm:text-xs font-bold text-white px-1.5 py-0.5 bg-slate-900 border border-slate-700 rounded-sm">
-            Day {leadTime} / {maxLead} ({leadTime * 24}h)
+          <span className="text-slate-400 font-medium">FORECAST LEAD:</span>
+          <span className="text-xs sm:text-sm font-bold text-white px-2 py-0.5 bg-slate-900 border border-primary/40 rounded-sm flex items-center gap-1.5 shadow-sm">
+            <span className="text-primary font-black">Day {leadTime}</span>
+            <span className="text-slate-600">/</span>
+            <span className="text-slate-400">{maxLead}</span>
+            <span className="text-primary/70 font-normal text-[9px] sm:text-[10px]">({leadTime * 24}h Horizon)</span>
           </span>
+          {isLoading && (
+            <span className="flex items-center gap-1 text-[9px] sm:text-[10px] text-amber-400 font-mono animate-pulse">
+              <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+              <span>SYNCING</span>
+            </span>
+          )}
           {!isRealMode && leadTime === 5 && (
             <span className="flex items-center gap-1 text-[9px] sm:text-[10px] font-bold text-critical bg-critical/15 px-1.5 py-0.5 border border-critical/40 rounded-sm animate-pulse">
               <AlertTriangle className="w-3 h-3" />
@@ -124,7 +133,7 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
       </div>
 
       {/* Scrubbing Range Slider */}
-      <div className="relative py-0.5">
+      <div className="relative py-1">
         <input
           type="range"
           min="1"
@@ -132,7 +141,7 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
           step="1"
           value={leadTime}
           onChange={(e) => onLeadTimeChange(parseInt(e.target.value, 10))}
-          className="w-full h-1.5 bg-slate-800 rounded-none appearance-none cursor-pointer border border-slate-700"
+          className="w-full h-1.5 bg-slate-800 accent-primary rounded-none appearance-none cursor-pointer border border-slate-700 hover:border-primary/50 transition-colors"
         />
       </div>
 
@@ -165,16 +174,16 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
               key={day}
               id={`timeline-day-${day}`}
               onClick={() => handleDayClick(day)}
-              className={`py-0.5 px-0.5 text-center font-mono text-[9px] sm:text-[10px] rounded-sm transition-all border ${
+              className={`py-1 px-0.5 text-center font-mono text-[9px] sm:text-[10px] rounded-sm transition-all border ${
                 isActive
-                  ? "bg-primary text-slate-950 border-primary font-bold shadow-md"
+                  ? "bg-primary text-slate-950 border-primary font-black shadow-[0_0_12px_rgba(56,189,248,0.4)] scale-[1.04] z-10 ring-1 ring-white/40"
                   : isOdishaBustDay
                   ? "bg-critical/20 text-rose-300 border-critical/50 hover:bg-critical/30 font-semibold"
-                  : "bg-slate-900/80 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-slate-200"
+                  : "bg-slate-900/90 text-slate-300 border-slate-700/80 hover:bg-slate-800 hover:border-slate-500 hover:text-white"
               }`}
             >
               <div className="leading-tight">D+{day}</div>
-              <div className="text-[7px] sm:text-[8px] opacity-75 font-sans leading-none mt-0.5">
+              <div className="text-[7px] sm:text-[8px] opacity-80 font-sans leading-none mt-0.5 font-medium">
                 {isOdishaBustDay ? "CRITICAL" : `${day * 24}h`}
               </div>
             </button>

@@ -7,7 +7,8 @@ import {
   Compass,
   TrendingDown,
   ShieldAlert,
-  Gauge
+  Gauge,
+  RefreshCw
 } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, CartesianGrid } from "recharts";
 import { GridProperties, PointDetailsResponse } from "../types/forecast";
@@ -18,6 +19,7 @@ interface RegionInspectorProps {
   onClose: () => void;
   leadTime: number;
   isRealMode?: boolean;
+  isLoading?: boolean;
 }
 
 export const RegionInspector: React.FC<RegionInspectorProps> = ({
@@ -26,6 +28,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
   onClose,
   leadTime,
   isRealMode: propIsRealMode,
+  isLoading = false,
 }) => {
   const [viewMode, setViewMode] = useState<"fss" | "analogs">("fss");
   const isRealMode = propIsRealMode !== undefined
@@ -110,7 +113,13 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
             <Compass className="w-3.5 h-3.5 text-primary" />
             <span>GRID [{properties.lat.toFixed(2)}°N, {properties.lon.toFixed(2)}°E]</span>
             <span className="text-slate-600">&bull;</span>
-            <span className="text-slate-300">D+{leadTime}</span>
+            <span className="text-slate-300 font-semibold">D+{leadTime}</span>
+            {isLoading && (
+              <span className="flex items-center gap-1 text-[9px] text-amber-400 font-mono animate-pulse bg-amber-400/10 px-1 py-0.2 rounded border border-amber-400/30">
+                <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                <span>SYNC</span>
+              </span>
+            )}
           </div>
           <h2 className="text-sm font-bold text-white tracking-tight mt-0.5">
             {properties.region_name}
@@ -125,7 +134,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto pr-1 mt-2.5 space-y-2.5 font-sans text-xs">
+      <div className={`flex-1 overflow-y-auto pr-1 mt-2.5 space-y-2.5 font-sans text-xs transition-opacity duration-150 ${isLoading ? "opacity-70 pointer-events-none" : "opacity-100"}`}>
         {/* Core Metric Banner: FCI & Conformal Bounds */}
         <div className={`p-3 rounded-sm border ${fciTier.bg}`}>
           <div className="flex items-center justify-between">
