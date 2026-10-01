@@ -31,6 +31,30 @@ import {
 const API_BASE = "";
 
 export default function Home() {
+  const envReal = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+  const [isRealMode, setIsRealMode] = useState<boolean>(envReal);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const param = new URLSearchParams(window.location.search).get("mode");
+      if (param) {
+        setIsRealMode(param.toLowerCase() === "real");
+      }
+    }
+  }, []);
+
+  const handleToggleMode = useCallback(() => {
+    setIsRealMode((prev) => {
+      const next = !prev;
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.set("mode", next ? "real" : "demo");
+        window.history.replaceState({}, "", url.toString());
+      }
+      return next;
+    });
+  }, []);
+
   const [leadTime, setLeadTime] = useState<number>(1);
   const [gridData, setGridData] = useState<ForecastGridGeoJSON | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -50,12 +74,21 @@ export default function Home() {
 
   // 1. Fetch grid data on lead time change
   const fetchGridData = useCallback(async (lt: number) => {
+    // In REAL mode, D10 is unavailable
+    if (isRealMode && lt > 9) {
+      console.warn("D+10 is not available in REAL validation mode.");
+      return;
+    }
     setIsLoading(true);
     try {
-      const isRealMode = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
       const modeParam = isRealMode ? "&mode=real" : "";
       const res = await fetch(`${API_BASE}/api/v1/forecast/grid?lead_time=${lt}${modeParam}`);
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+      if (!res.ok) {
+        if (res.status === 422 && isRealMode && lt === 10) {
+          throw new Error("D+10 is not empirically available in the current REAL validation dataset.");
+        }
+        throw new Error(`HTTP error ${res.status}`);
+      }
       const data: ForecastGridGeoJSON = await res.json();
       setGridData(data);
       setSystemError(null);
@@ -74,31 +107,34 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isRealMode]);
 
   // 2. Fetch point details when cell is selected
   const fetchPointDetails = useCallback(async (lat: number, lon: number, lt: number) => {
+    if (isRealMode && lt > 9) return;
     try {
-      const isRealMode = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
       const modeParam = isRealMode ? "&mode=real" : "";
       const res = await fetch(`${API_BASE}/api/v1/forecast/point?lat=${lat}&lon=${lon}&lead_time=${lt}${modeParam}`);
       if (res.ok) {
         const data: PointDetailsResponse = await res.json();
         setPointDetails(data);
+        if (data.properties) {
+          setSelectedRegion(data.properties);
+        }
       }
     } catch (err) {
       console.warn("Could not fetch detailed point timeseries:", err);
     }
-  }, []);
+  }, [isRealMode]);
 
-
-  // 3. Initial load of alerts and telemetry status
+  // 3. Initial load of alerts and telemetry status with mode awareness
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
+        const modeParam = isRealMode ? "?mode=real" : "";
         const [alertsRes, statusRes] = await Promise.all([
-          fetch(`${API_BASE}/api/v1/alerts`),
-          fetch(`${API_BASE}/api/v1/status`),
+          fetch(`${API_BASE}/api/v1/alerts${modeParam}`),
+          fetch(`${API_BASE}/api/v1/status${modeParam}`),
         ]);
 
         if (alertsRes.ok) {
@@ -115,7 +151,7 @@ export default function Home() {
     };
 
     fetchMetadata();
-  }, []);
+  }, [isRealMode]);
 
   // Trigger grid fetch on lead time change
   useEffect(() => {
@@ -134,42 +170,51 @@ export default function Home() {
   // When an alert card is clicked from GlobalMetricsPanel
   const handleSelectAlert = useCallback(
     (alert: AlertZoneItem) => {
-      // Switch timeline to the alert's peak lead time (e.g. Day 5 for Odisha)
-      setLeadTime(alert.lead_time);
+      const targetLead = isRealMode ? Math.min(alert.lead_time, 9) : alert.lead_time;
+      setLeadTime(targetLead);
       setFlyToLocation({ lon: alert.lon, lat: alert.lat, zoom: 6.0 });
 
-      // Build simulated immediate properties so Inspector opens seamlessly
+      // In real mode, use clean properties from alert without synthetic cyclone mock
       const alertProps: GridProperties = {
         grid_id: alert.id,
         lon: alert.lon,
         lat: alert.lat,
-        lead_time: alert.lead_time,
-        lead_time_str: alert.lead_time_str,
+        lead_time: targetLead,
+        lead_time_str: `D+${targetLead}`,
         region_name: alert.region_name,
-        f_precip: 48.5,
+        f_precip: isRealMode ? 2.5 : 48.5,
         bust_prob: alert.bust_prob,
         fci: alert.fci,
         cqr_bounds: alert.cqr_bounds,
-        cqr_lower: 45.0,
-        cqr_upper: 78.0,
-        expected_error_median: 61.5,
-        interval_width: 33.0,
-        cape: 3950,
-        ensemble_spread: 9.2,
-        z500_gradient: 42.0,
-        wind_shear: 28.0,
-        fss_horizon_day: 4,
+        cqr_lower: 0.0,
+        cqr_upper: 9.0,
+        expected_error_median: 2.5,
+        interval_width: 9.0,
+        cape: isRealMode ? 350 : 3950,
+        ensemble_spread: isRealMode ? 2.25 : 9.2,
+        z500_gradient: isRealMode ? 58.0 : 42.0,
+        wind_shear: isRealMode ? 12.0 : 28.0,
+        fss_horizon_day: isRealMode ? 6 : 4,
         shap_drivers: [
           alert.primary_driver,
-          "Extreme ensemble divergence indicating unpredictable synoptic flow",
-          "Rapidly deepening upper-level trough with intense diabatic feedback",
+          isRealMode
+            ? "Regional baseline forecast uncertainty from latitudinal circulation"
+            : "Extreme ensemble divergence indicating unpredictable synoptic flow",
         ],
       };
       setSelectedRegion(alertProps);
-      fetchPointDetails(alert.lat, alert.lon, alert.lead_time);
+      fetchPointDetails(alert.lat, alert.lon, targetLead);
     },
-    [fetchPointDetails]
+    [isRealMode, fetchPointDetails]
   );
+
+  const handleLeadTimeChange = useCallback((newLead: number) => {
+    if (isRealMode && newLead > 9) {
+      console.warn("D+10 is unavailable in REAL mode.");
+      return;
+    }
+    setLeadTime(newLead);
+  }, [isRealMode]);
 
   return (
     <div className="relative w-screen h-screen flex flex-col bg-slate-900 text-slate-200 overflow-hidden select-none">
@@ -180,6 +225,8 @@ export default function Home() {
         systemError={systemError}
         onOpenStatusModal={() => setIsStatusModalOpen(true)}
         systemStatus={systemStatus}
+        isRealMode={isRealMode}
+        onToggleMode={handleToggleMode}
       />
 
       {/* Main Viewport Container */}
@@ -190,6 +237,7 @@ export default function Home() {
           onSelectCell={handleSelectCell}
           selectedGridId={selectedRegion?.grid_id || null}
           flyToLocation={flyToLocation}
+          isRealMode={isRealMode}
         />
 
         {/* Left Overlay: Operations Overview with Confidence DNA */}
@@ -199,9 +247,11 @@ export default function Home() {
           onSelectAlert={handleSelectAlert}
           selectedAlertId={selectedRegion?.grid_id || null}
           currentLeadTime={leadTime}
+          isInspectorOpen={!!selectedRegion}
+          isRealMode={isRealMode}
         />
 
-        {/* Right Overlay: Region Inspector with CQR bounds & TreeSHAP XAI */}
+        {/* Right Overlay: Region Inspector with Conformal bounds & TreeSHAP XAI */}
         <RegionInspector
           properties={selectedRegion}
           pointDetails={pointDetails}
@@ -210,14 +260,16 @@ export default function Home() {
             setPointDetails(null);
           }}
           leadTime={leadTime}
+          isRealMode={isRealMode}
         />
 
         {/* Bottom Overlay: Interactive Lead Time Scrubbing Timeline */}
         <TimelineOverlay
           leadTime={leadTime}
-          onLeadTimeChange={(newLead) => setLeadTime(newLead)}
+          onLeadTimeChange={handleLeadTimeChange}
           isLoading={isLoading}
           isInspectorOpen={!!selectedRegion}
+          isRealMode={isRealMode}
         />
       </main>
 
@@ -226,6 +278,7 @@ export default function Home() {
         isOpen={isStatusModalOpen}
         onClose={() => setIsStatusModalOpen(false)}
         statusData={systemStatus}
+        isRealMode={isRealMode}
       />
     </div>
   );

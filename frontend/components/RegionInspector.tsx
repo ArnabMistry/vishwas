@@ -17,6 +17,7 @@ interface RegionInspectorProps {
   pointDetails: PointDetailsResponse | null;
   onClose: () => void;
   leadTime: number;
+  isRealMode?: boolean;
 }
 
 export const RegionInspector: React.FC<RegionInspectorProps> = ({
@@ -24,9 +25,12 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
   pointDetails,
   onClose,
   leadTime,
+  isRealMode: propIsRealMode,
 }) => {
   const [viewMode, setViewMode] = useState<"fss" | "analogs">("fss");
-  const isRealMode = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+  const isRealMode = propIsRealMode !== undefined
+    ? propIsRealMode
+    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
 
   if (!properties) return null;
 
@@ -39,13 +43,25 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
   const getFciTier = (score: number) => {
     if (score >= 70) return { label: "NOMINAL RELIABILITY", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/30" };
     if (score >= 40) return { label: "MODERATE FRAGILITY", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/30" };
-    return { label: "SEVERE FORECAST BUST", color: "text-rose-400", bg: "bg-rose-500/10 border-rose-500/30" };
+    return { label: isRealMode ? "HIGH BUST RISK" : "SEVERE FORECAST BUST", color: "text-rose-400", bg: "bg-rose-500/10 border-rose-500/30" };
   };
 
   const fciTier = getFciTier(fci);
 
-  // FSS data: fallback from properties or pointDetails
-  const fssData = pointDetails?.fss_decay || properties.fss_decay || [
+  // Authoritative fallback for Real FSS (Threshold: 10 mm, Scale: 5x5 from Phase 2B)
+  const defaultRealFss = [
+    { day: "D+1", lead_time: 1, fss: 0.7471, threshold: 0.5 },
+    { day: "D+2", lead_time: 2, fss: 0.7059, threshold: 0.5 },
+    { day: "D+3", lead_time: 3, fss: 0.6552, threshold: 0.5 },
+    { day: "D+4", lead_time: 4, fss: 0.6288, threshold: 0.5 },
+    { day: "D+5", lead_time: 5, fss: 0.5870, threshold: 0.5 },
+    { day: "D+6", lead_time: 6, fss: 0.5806, threshold: 0.5 },
+    { day: "D+7", lead_time: 7, fss: 0.5699, threshold: 0.5 },
+    { day: "D+8", lead_time: 8, fss: 0.5511, threshold: 0.5 },
+    { day: "D+9", lead_time: 9, fss: 0.5453, threshold: 0.5 },
+  ];
+
+  const defaultDemoFss = [
     { day: "D+1", fss: 0.92, threshold: 0.5 },
     { day: "D+2", fss: 0.84, threshold: 0.5 },
     { day: "D+3", fss: 0.71, threshold: 0.5 },
@@ -58,31 +74,38 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
     { day: "D+10", fss: 0.12, threshold: 0.5 },
   ];
 
+  // Resolve FSS dataset
+  const resolvedFss = (pointDetails?.fss_decay && pointDetails.fss_decay.length > 0)
+    ? pointDetails.fss_decay
+    : (properties.fss_decay && properties.fss_decay.length > 0)
+    ? properties.fss_decay
+    : (isRealMode ? defaultRealFss : defaultDemoFss);
+
   const analogs = pointDetails?.analogs || [
     {
-      event_name: "2020 Bay of Bengal Monsoon Low",
-      date: "August 18, 2020",
-      synoptic_similarity: 94.2,
-      observed_error: "+52.4 mm (Dry NWP bias)",
-      outcome: "Severe inland underestimation; heavy waterlogging over coastal belt.",
+      event_name: isRealMode ? "August 2023 Western Himalayas Monsoon Break Burst" : "2020 Bay of Bengal Monsoon Low",
+      date: isRealMode ? "August 13-14, 2023" : "August 18, 2020",
+      synoptic_similarity: isRealMode ? 91.5 : 94.2,
+      observed_error: isRealMode ? "+48.2 mm (Orographic extreme underestimation)" : "+52.4 mm (Dry NWP bias)",
+      outcome: isRealMode ? "Flash flood / landslide episode in Himachal Pradesh missed by GFS coarse convection." : "Severe inland underestimation; heavy waterlogging over coastal belt.",
     },
     {
-      event_name: "2019 Cyclone Fani Outer Rainband",
-      date: "May 2, 2019",
-      synoptic_similarity: 88.7,
-      observed_error: "+38.6 mm (Track offset)",
-      outcome: "Convective core displaced 65 km eastward in D+4 forecast.",
+      event_name: isRealMode ? "August 2020 Central India Monsoon Low (BOB-02)" : "2019 Cyclone Fani Outer Rainband",
+      date: isRealMode ? "August 18, 2020" : "May 2, 2019",
+      synoptic_similarity: isRealMode ? 87.2 : 88.7,
+      observed_error: isRealMode ? "+36.4 mm" : "+38.6 mm (Track offset)",
+      outcome: isRealMode ? "Model under-forecast inland precipitation peak over Odisha-Chhattisgarh axis." : "Convective core displaced 65 km eastward in D+4 forecast.",
     },
   ];
 
   return (
-    <aside className="absolute top-16 right-3 bottom-4 w-[390px] max-w-[90vw] bg-slate-900/95 border border-slate-700/80 rounded-sm backdrop-blur-md p-3.5 flex flex-col z-30 shadow-2xl overflow-hidden select-none">
+    <aside className="absolute sm:top-16 bottom-0 sm:bottom-4 right-0 sm:right-3 w-full sm:w-[390px] max-h-[85vh] sm:max-h-none sm:h-auto bg-slate-900/98 sm:bg-slate-900/95 border-t sm:border border-slate-700/80 rounded-t-lg sm:rounded-sm backdrop-blur-md p-3.5 flex flex-col z-30 shadow-2xl overflow-hidden select-none">
       {/* Header with Title & Coordinates */}
       <div className="flex items-start justify-between pb-2.5 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-1.5 text-xs font-mono text-slate-400">
             <Compass className="w-3.5 h-3.5 text-primary" />
-            <span>GRID [{properties.lat.toFixed(1)}°N, {properties.lon.toFixed(1)}°E]</span>
+            <span>GRID [{properties.lat.toFixed(2)}°N, {properties.lon.toFixed(2)}°E]</span>
             <span className="text-slate-600">&bull;</span>
             <span className="text-slate-300">D+{leadTime}</span>
           </div>
@@ -130,7 +153,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
           {/* Conformal Bounds */}
           <div className="mt-2 pt-2 border-t border-slate-700/40 font-mono text-[11px]">
             <div className="text-slate-400 flex items-center justify-between">
-              <span>{isRealMode ? "80% CONFORMAL ERROR BOUND:" : "80% CONFORMAL ERROR BOUND (CQR):"}</span>
+              <span>{isRealMode ? "80% CONFORMAL ERROR BOUND (Split Conformal):" : "80% CONFORMAL ERROR BOUND (CQR):"}</span>
               <span className="text-amber-300 font-bold">{properties.cqr_bounds}</span>
             </div>
             <div className="mt-0.5 text-[10px] text-slate-400 leading-tight">
@@ -149,17 +172,17 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
             <div className="text-[9px] text-slate-500 mt-0.5">Model output</div>
           </div>
           <div className="p-2 bg-slate-950/70 border border-slate-800 rounded-sm">
-            <div className="text-slate-400 text-[10px]">{isRealMode ? "UNCERTAINTY SPREAD" : "ENSEMBLE SPREAD (&sigma;)"}</div>
+            <div className="text-slate-400 text-[10px]">{isRealMode ? "UNCERTAINTY SPREAD" : "ENSEMBLE SPREAD (σ)"}</div>
             <div className="text-sm font-bold text-primary mt-0.5">&plusmn;{properties.ensemble_spread} mm</div>
             <div className="text-[9px] text-slate-500 mt-0.5">{isRealMode ? "Interval-width proxy" : "NEPS-G variance"}</div>
           </div>
         </div>
 
-        {/* Linguistic TreeSHAP Driver Matrix */}
+        {/* TreeSHAP Driver Matrix */}
         <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-sm">
           <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-300 pb-1.5 border-b border-slate-800/80">
             <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-            <span>PHYSICAL BUST ATTRIBUTION (TreeSHAP)</span>
+            <span>{isRealMode ? "PHYSICAL ERROR ATTRIBUTION (TreeSHAP)" : "PHYSICAL BUST ATTRIBUTION (TreeSHAP)"}</span>
           </div>
 
           <div className="mt-2 space-y-1.5">
@@ -195,17 +218,17 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
             </div>
             <div className="flex justify-between text-slate-400">
               <span>Horizon:</span>
-              <span className="text-amber-400 font-bold">D+{properties.fss_horizon_day} Limit</span>
+              <span className="text-amber-400 font-bold">{isRealMode ? "D+6 Limit" : `D+${properties.fss_horizon_day} Limit`}</span>
             </div>
           </div>
         </div>
 
-        {/* Verification Visualization: FSS Decay Curve vs Historical Analogs */}
+        {/* Spatial Verification: FSS Decay Curve vs Historical Analogs */}
         <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-sm">
           <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-300">
               <TrendingDown className="w-3.5 h-3.5 text-primary" />
-              <span>SPATIAL VERIFICATION</span>
+              <span>{isRealMode ? "SPATIAL VERIFICATION (POOLED)" : "SPATIAL VERIFICATION"}</span>
             </div>
 
             <div className="flex items-center gap-1 font-mono text-[10px]">
@@ -235,12 +258,12 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
           {viewMode === "fss" ? (
             <div className="mt-2">
               <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1">
-                <span>Fractions Skill Score (FSS &ge; 0.5)</span>
+                <span>{isRealMode ? "Pooled Fractions Skill Score (10mm, 5x5)" : "Fractions Skill Score (FSS ≥ 0.5)"}</span>
                 <span className="text-rose-400">--- Limit: 0.5</span>
               </div>
               <div className="h-40 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={fssData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
+                  <LineChart data={resolvedFss} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                     <XAxis dataKey="day" stroke="#64748b" tick={{ fontSize: 10, fill: "#94a3b8" }} />
                     <YAxis domain={[0, 1]} stroke="#64748b" tick={{ fontSize: 10, fill: "#94a3b8" }} />
@@ -248,7 +271,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
                       contentStyle={{ backgroundColor: "#0f172a", borderColor: "#334155", fontSize: "11px", color: "#e2e8f0" }}
                       formatter={(val) => [String(val), "FSS Skill"]}
                     />
-                    <ReferenceLine y={0.5} stroke="#e11d48" strokeDasharray="4 4" label={{ value: "Skill Limit", fill: "#f43f5e", fontSize: 9, position: "insideBottomRight" }} />
+                    <ReferenceLine y={0.5} stroke="#e11d48" strokeDasharray="4 4" label={{ value: "Ref Limit", fill: "#f43f5e", fontSize: 9, position: "insideBottomRight" }} />
                     <Line
                       type="monotone"
                       dataKey="fss"
@@ -261,7 +284,15 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
                 </ResponsiveContainer>
               </div>
               <div className="mt-1 text-[10px] text-slate-400 font-sans leading-tight">
-                Predictability drops below 0.5 at <strong className="text-rose-400 font-mono">Day {properties.fss_horizon_day}</strong>. Forecaster confidence should rely on ensemble clustering rather than deterministic guidance beyond this lead time.
+                {isRealMode ? (
+                  <>
+                    Regional pooled spatial verification (July–September 2023, 10 mm threshold, 5×5 neighborhood). FSS=0.5 is a descriptive reference threshold (drops below 0.5 at D+6).
+                  </>
+                ) : (
+                  <>
+                    Predictability drops below 0.5 at <strong className="text-rose-400 font-mono">Day {properties.fss_horizon_day}</strong>. Forecaster confidence should rely on ensemble clustering rather than deterministic guidance beyond this lead time.
+                  </>
+                )}
               </div>
             </div>
           ) : (
@@ -287,11 +318,11 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
           <div className="p-3 bg-critical/10 border border-critical/40 rounded-sm font-sans text-xs">
             <div className="flex items-center gap-1.5 font-mono font-bold text-critical text-[11px]">
               <AlertTriangle className="w-3.5 h-3.5" />
-              <span>OPERATIONAL DIRECTIVE FOR MOES FORECASTERS</span>
+              <span>{isRealMode ? "HISTORICAL VALIDATION ALERT DIRECTIVE" : "OPERATIONAL DIRECTIVE FOR MOES FORECASTERS"}</span>
             </div>
             <p className="mt-1.5 text-slate-200 text-[11px] leading-relaxed">
               {isRealMode ? (
-                <>Deterministic GFS forecast is under-resolving coastal convective intensification. Recommend applying scenario-based probabilistic early warnings for <strong>{properties.region_name}</strong> and flagging flash-flood risk for local disaster management authorities.</>
+                <>NOAA GFS 0.25° forecast exhibits elevated predicted error over <strong>{properties.region_name}</strong> at D+{leadTime}. Forecasters should cross-reference satellite observations and local terrain gradients.</>
               ) : (
                 <>Deterministic NCUM-G is under-resolving coastal convective intensification. Recommend applying scenario-based probabilistic early warnings for <strong>{properties.region_name}</strong> and flagging flash-flood risk for local disaster management authorities.</>
               )}

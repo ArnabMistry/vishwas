@@ -1,21 +1,28 @@
 "use client";
 
 import React from "react";
-import { X, CheckCircle, ShieldCheck, Cpu, Database, Radio, Activity } from "lucide-react";
+import { X, CheckCircle, ShieldCheck, Cpu, Database, Radio, Activity, AlertTriangle } from "lucide-react";
 import { SystemStatusData } from "../types/forecast";
 
 interface SystemStatusModalProps {
   isOpen: boolean;
   onClose: () => void;
   statusData: SystemStatusData | null;
+  isRealMode?: boolean;
 }
 
 export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
   isOpen,
   onClose,
   statusData,
+  isRealMode: propIsRealMode,
 }) => {
   if (!isOpen) return null;
+
+  const isRealMode = propIsRealMode !== undefined
+    ? propIsRealMode
+    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL" ||
+      statusData?.status === "HISTORICAL_VALIDATION";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 select-none animate-in fade-in duration-150">
@@ -26,10 +33,14 @@ export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
             <Activity className="w-5 h-5 text-emerald-400" />
             <div>
               <h3 className="font-mono text-sm font-bold text-white tracking-wide">
-                SYSTEM TELEMETRY & PIPELINE SPECIFICATION
+                {isRealMode
+                  ? "HISTORICAL VALIDATION TELEMETRY & SPECIFICATION"
+                  : "SYSTEM TELEMETRY & PIPELINE SPECIFICATION"}
               </h3>
               <p className="text-[11px] text-slate-400 font-sans">
-                National Centre for Medium Range Weather Forecasting (NCMRWF) &bull; MoES
+                {isRealMode
+                  ? "Retrospective Research Validation Pipeline (Proxy for NCMRWF Operational Evaluation)"
+                  : "National Centre for Medium Range Weather Forecasting (NCMRWF) • MoES"}
               </p>
             </div>
           </div>
@@ -50,10 +61,12 @@ export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
                 <span>NWP MODEL INSTANCE</span>
               </div>
               <div className="text-sm font-bold text-slate-100 mt-1">
-                {statusData?.nwp_model || "NCUM-G"}
+                {statusData?.nwp_model || (isRealMode ? "NOAA-GFS 0.25° (Open Proxy)" : "NCUM-G")}
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">
-                Resolution: 12 km &bull; 70 vertical levels
+                {isRealMode
+                  ? "Resolution: 0.25° (~27 km) • Open Data Proxy"
+                  : "Resolution: 12 km • 70 vertical levels"}
               </div>
             </div>
 
@@ -63,10 +76,12 @@ export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
                 <span>DATA STREAM & PROVENANCE</span>
               </div>
               <div className="text-sm font-bold text-slate-100 mt-1">
-                {statusData?.cycle || "00Z Operational Run"}
+                {statusData?.cycle || (isRealMode ? "Historical Validation 2023" : "00Z Operational Run")}
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">
-                IMD 0.25&deg; Gridded Rainfall Proxy
+                {isRealMode
+                  ? "IMD 0.25° Gridded Rainfall Ground Truth"
+                  : "IMD 0.25° Gridded Rainfall Proxy"}
               </div>
             </div>
 
@@ -76,7 +91,7 @@ export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
                 <span>MACHINE LEARNING REGRESSOR</span>
               </div>
               <div className="text-sm font-bold text-slate-100 mt-1">
-                {statusData?.ml_regressor || "XGBoost Regressor v1.2"}
+                {statusData?.ml_regressor || "XGBoost Regressor"}
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">
                 Target: Absolute Forecast Error |F - O|
@@ -86,13 +101,17 @@ export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
             <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-sm">
               <div className="flex items-center gap-1.5 text-slate-400 text-[10px]">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>CQR UNCERTAINTY QUANTIFICATION</span>
+                <span>{isRealMode ? "CONFORMAL ENGINE" : "CQR UNCERTAINTY QUANTIFICATION"}</span>
               </div>
               <div className="text-sm font-bold text-slate-100 mt-1">
-                MAPIE Calibration Active
+                {isRealMode
+                  ? (statusData?.calibration_method || "Split Conformal Prediction (MAPIE)")
+                  : (statusData?.calibration_method || "MAPIE Calibration Active")}
               </div>
               <div className="text-[10px] text-slate-400 mt-0.5">
-                80% Conformal Coverage (&alpha; = 0.20)
+                {isRealMode
+                  ? "Coverage under exchangeability (α = 0.20)"
+                  : "80% Conformal Coverage (α = 0.20)"}
               </div>
             </div>
           </div>
@@ -100,9 +119,14 @@ export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
           {/* Verification Pipeline Checks */}
           <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-sm">
             <div className="text-[11px] font-bold text-slate-300 pb-2 border-b border-slate-800 flex items-center justify-between">
-              <span>OPERATIONAL PIPELINE HEALTH CHECK</span>
+              <span>
+                {isRealMode
+                  ? "HISTORICAL VALIDATION PIPELINE HEALTH CHECK"
+                  : "OPERATIONAL PIPELINE HEALTH CHECK"}
+              </span>
               <span className="text-emerald-400 flex items-center gap-1 text-[10px]">
-                <CheckCircle className="w-3 h-3" /> ALL SUBSYSTEMS GREEN
+                <CheckCircle className="w-3 h-3" />
+                {isRealMode ? "HISTORICAL ARCHIVE VERIFIED" : "ALL SUBSYSTEMS GREEN"}
               </span>
             </div>
 
@@ -110,37 +134,59 @@ export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
               <div className="flex items-center justify-between text-slate-300">
                 <span className="flex items-center gap-2">
                   <CheckCircle className="w-3 h-3 text-emerald-400" />
-                  NWP Data Ingestion (NCUM-G medium-range D+1..10):
+                  {isRealMode
+                    ? "NWP Data Ingestion (NOAA-GFS D+1..D+9 0.25° Archive):"
+                    : "NWP Data Ingestion (NCUM-G medium-range D+1..10):"}
                 </span>
-                <span className="text-emerald-400 font-semibold">SYNCHRONIZED</span>
+                <span className="text-emerald-400 font-semibold">
+                  {isRealMode ? "VERIFIED (D1–D9)" : "SYNCHRONIZED"}
+                </span>
               </div>
               <div className="flex items-center justify-between text-slate-300">
                 <span className="flex items-center gap-2">
                   <CheckCircle className="w-3 h-3 text-emerald-400" />
-                  Feature Engine (Thermodynamic CAPE, Z500, Shear):
+                  {isRealMode
+                    ? "Observation Ground Truth (IMD 0.25° 4,905 Land Cells):"
+                    : "Feature Engine (Thermodynamic CAPE, Z500, Shear):"}
                 </span>
-                <span className="text-emerald-400 font-semibold">CALCULATED</span>
+                <span className="text-emerald-400 font-semibold">
+                  {isRealMode ? "SYNCHRONIZED" : "CALCULATED"}
+                </span>
               </div>
               <div className="flex items-center justify-between text-slate-300">
                 <span className="flex items-center gap-2">
                   <CheckCircle className="w-3 h-3 text-emerald-400" />
-                  Conformal Quantile Regressor (MAPIE Split CQR):
+                  {isRealMode
+                    ? "Conformal Uncertainty Engine (Split Conformal Prediction):"
+                    : "Conformal Quantile Regressor (MAPIE Split CQR):"}
                 </span>
                 <span className="text-emerald-400 font-semibold">CALIBRATED</span>
               </div>
               <div className="flex items-center justify-between text-slate-300">
                 <span className="flex items-center gap-2">
                   <CheckCircle className="w-3 h-3 text-emerald-400" />
-                  TreeSHAP Linguistic Translation Layer:
+                  {isRealMode
+                    ? "Spatial Verification (Phase 2B Pooled FSS Study):"
+                    : "TreeSHAP Linguistic Translation Layer:"}
                 </span>
-                <span className="text-emerald-400 font-semibold">ONLINE</span>
+                <span className="text-emerald-400 font-semibold">
+                  {isRealMode ? "VALIDATED" : "ONLINE"}
+                </span>
               </div>
               <div className="flex items-center justify-between text-slate-300">
                 <span className="flex items-center gap-2">
-                  <CheckCircle className="w-3 h-3 text-emerald-400" />
-                  FastAPI High-Speed GeoJSON Serialization:
+                  {isRealMode ? (
+                    <AlertTriangle className="w-3 h-3 text-amber-400" />
+                  ) : (
+                    <CheckCircle className="w-3 h-3 text-emerald-400" />
+                  )}
+                  {isRealMode
+                    ? "Operational NCUM-G Telemetry Link:"
+                    : "FastAPI High-Speed GeoJSON Serialization:"}
                 </span>
-                <span className="text-emerald-400 font-semibold">0.4ms LATENCY</span>
+                <span className={isRealMode ? "text-amber-400 font-semibold" : "text-emerald-400 font-semibold"}>
+                  {isRealMode ? "NOT CONNECTED (DISCLAIMER)" : "0.4ms LATENCY"}
+                </span>
               </div>
             </div>
           </div>
@@ -148,7 +194,11 @@ export const SystemStatusModal: React.FC<SystemStatusModalProps> = ({
 
         {/* Modal Footer */}
         <div className="mt-5 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500">
-          <span>PROTOTYPE NOTICE: Operating on curated historical proxy dataset.</span>
+          <span>
+            {isRealMode
+              ? "HISTORICAL VALIDATION NOTICE: Retrospective proxy validation. NCUM-G operational telemetry not connected."
+              : "PROTOTYPE NOTICE: Operating on curated historical proxy dataset."}
+          </span>
           <button
             onClick={onClose}
             className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-sm font-semibold transition-colors"

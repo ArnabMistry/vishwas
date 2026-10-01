@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ChevronUp,
   Activity,
@@ -16,6 +16,8 @@ interface GlobalMetricsPanelProps {
   onSelectAlert: (alert: AlertZoneItem) => void;
   selectedAlertId: string | null;
   currentLeadTime: number;
+  isInspectorOpen?: boolean;
+  isRealMode?: boolean;
 }
 
 export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
@@ -24,8 +26,20 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
   onSelectAlert,
   selectedAlertId,
   currentLeadTime,
+  isInspectorOpen = false,
+  isRealMode: propIsRealMode,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const isRealMode = propIsRealMode !== undefined
+    ? propIsRealMode
+    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+
+  // Auto-collapse on tablet / mobile when inspector opens to prevent tiny map sliver
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 1280 && isInspectorOpen) {
+      setIsCollapsed(true);
+    }
+  }, [isInspectorOpen]);
 
   // Helper to color DNA barcode vertical ticks (Days 1 to 10)
   const getBarcodeColor = (prob: number) => {
@@ -38,7 +52,7 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
   return (
     <aside
       className={`absolute top-16 left-3 z-20 transition-all duration-200 select-none ${
-        isCollapsed ? "w-11 h-11" : "w-72 max-h-[calc(100vh-5rem)] flex flex-col"
+        isCollapsed ? "w-11 h-11" : "w-64 xl:w-72 max-h-[calc(100vh-5rem)] flex flex-col"
       }`}
     >
       {/* Collapsed toggle button */}
@@ -46,7 +60,7 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
         <button
           onClick={() => setIsCollapsed(false)}
           className="w-11 h-11 bg-slate-900/95 border border-slate-700/80 rounded-sm text-slate-300 hover:text-white flex items-center justify-center shadow-xl backdrop-blur-md"
-          title="Expand Operations Overview"
+          title={isRealMode ? "Expand Validation Overview" : "Expand Operations Overview"}
         >
           <BarChart2 className="w-5 h-5 text-primary" />
         </button>
@@ -56,7 +70,7 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
           <div className="flex items-center justify-between pb-2 border-b border-slate-800">
             <div className="flex items-center gap-1.5 font-mono text-xs font-bold text-slate-200">
               <Activity className="w-4 h-4 text-primary" />
-              <span>OPERATIONS OVERVIEW</span>
+              <span>{isRealMode ? "HISTORICAL OVERVIEW" : "OPERATIONS OVERVIEW"}</span>
             </div>
             <button
               onClick={() => setIsCollapsed(true)}
@@ -73,23 +87,23 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
               <div className="p-2 bg-slate-950/70 border border-slate-800 rounded-sm">
                 <div className="text-[10px] text-slate-400">MEAN NETWORK FCI</div>
                 <div className="text-lg font-black text-slate-100 mt-0.5">
-                  {systemStatus?.mean_network_fci ? systemStatus.mean_network_fci.toFixed(1) : "67.3"}
+                  {systemStatus?.mean_network_fci ? systemStatus.mean_network_fci.toFixed(1) : (isRealMode ? "62.4" : "67.3")}
                   <span className="text-[11px] font-normal text-slate-500">/100</span>
                 </div>
                 <div className="text-[9px] text-emerald-400 mt-0.5 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                  Baseline Stable
+                  {isRealMode ? "Historical Baseline" : "Baseline Stable"}
                 </div>
               </div>
 
               <div className="p-2 bg-slate-950/70 border border-slate-800 rounded-sm">
-                <div className="text-[10px] text-slate-400">BUST HOTSPOTS</div>
+                <div className="text-[10px] text-slate-400">{isRealMode ? "RISK ZONES" : "BUST HOTSPOTS"}</div>
                 <div className="text-lg font-black text-critical mt-0.5">
                   {alerts.length}
                 </div>
                 <div className="text-[9px] text-rose-400 mt-0.5 flex items-center gap-1">
                   <Flame className="w-2.5 h-2.5" />
-                  Active In Basin
+                  {isRealMode ? "Evaluated in Basin" : "Active In Basin"}
                 </div>
               </div>
             </div>
@@ -98,11 +112,11 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
             <div className="p-2 bg-slate-950/70 border border-slate-800 rounded-sm">
               <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1.5">
                 <span>GRID ERROR DISTRIBUTION</span>
-                <span>840 CELLS</span>
+                <span>{isRealMode ? "4,905 CELLS" : "840 CELLS"}</span>
               </div>
               <div className="space-y-1 font-mono text-[10px]">
                 <div className="flex items-center gap-2">
-                  <span className="w-14 text-slate-400">&gt;85% Bust:</span>
+                  <span className="w-14 text-slate-400">&gt;85% {isRealMode ? "Risk" : "Bust"}:</span>
                   <div className="flex-1 bg-slate-800 h-2 rounded-none overflow-hidden">
                     <div className="bg-critical h-full" style={{ width: currentLeadTime >= 4 ? "18%" : "6%" }} />
                   </div>
@@ -127,7 +141,7 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
                   <span className="text-primary font-bold w-7 text-right">32%</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-14 text-slate-400">&lt;30% Safe:</span>
+                  <span className="w-14 text-slate-400">&lt;30% {isRealMode ? "Low" : "Safe"}:</span>
                   <div className="flex-1 bg-slate-800 h-2 rounded-none overflow-hidden">
                     <div className="bg-slate-500 h-full" style={{ width: currentLeadTime >= 4 ? "26%" : "48%" }} />
                   </div>
@@ -143,7 +157,7 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
               <div className="flex items-center justify-between pb-1 text-xs font-mono font-bold text-slate-300">
                 <span className="flex items-center gap-1.5">
                   <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-                  MONITORED BUST ZONES
+                  {isRealMode ? "HISTORICAL MONITORED ZONES" : "MONITORED BUST ZONES"}
                 </span>
                 <span className="text-[9px] text-slate-500 font-normal">CLICK TO FLY</span>
               </div>
@@ -169,9 +183,12 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
                           <span className={`w-1.5 h-1.5 rounded-full ${isSevere ? "bg-critical animate-ping" : "bg-amber-400"}`} />
                           {alert.region_name}
                         </div>
-                        <span className={`text-[10px] font-bold px-1 rounded-sm ${
-                          isSevere ? "bg-critical/20 text-rose-300 border border-critical/40" : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                        }`}>
+                        <span
+                          className={`text-[10px] font-bold px-1 rounded-sm ${
+                            isSevere ? "bg-critical/20 text-rose-300 border border-critical/40" : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                          }`}
+                          title={isRealMode ? "Derived Bust Risk Score" : "Bust Probability"}
+                        >
                           {(alert.bust_prob * 100).toFixed(0)}%
                         </span>
                       </div>
@@ -185,18 +202,31 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
                       <div className="mt-1.5 pt-1 border-t border-slate-800/60">
                         <div className="flex items-center justify-between text-[8px] font-mono text-slate-500 mb-0.5">
                           <span>CONFIDENCE DNA:</span>
-                          <span>D1 &rarr; D10</span>
+                          <span>{isRealMode ? "D1 → D9 (D10 N/A)" : "D1 → D10"}</span>
                         </div>
                         <div className="grid grid-cols-10 gap-0.5 h-2.5">
-                          {alert.dna_barcode.map((prob, idx) => (
-                            <div
-                              key={idx}
-                              className={`h-full ${getBarcodeColor(prob)} ${
-                                idx + 1 === currentLeadTime ? "ring-1 ring-white" : ""
-                              }`}
-                              title={`D+${idx + 1}: ${(prob * 100).toFixed(0)}% bust risk`}
-                            />
-                          ))}
+                          {alert.dna_barcode.map((prob, idx) => {
+                            if (isRealMode && idx === 9) {
+                              return (
+                                <div
+                                  key={idx}
+                                  className="h-full bg-slate-800/80 border border-slate-700/60 flex items-center justify-center opacity-40 cursor-not-allowed"
+                                  title="D+10: Data not empirically available in REAL mode"
+                                >
+                                  <span className="text-[6px] text-slate-500 font-mono">X</span>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div
+                                key={idx}
+                                className={`h-full ${getBarcodeColor(prob)} ${
+                                  idx + 1 === currentLeadTime ? "ring-1 ring-white" : ""
+                                }`}
+                                title={`D+${idx + 1}: ${(prob * 100).toFixed(0)}% ${isRealMode ? "bust risk score" : "bust prob"}`}
+                              />
+                            );
+                          })}
                         </div>
                       </div>
 

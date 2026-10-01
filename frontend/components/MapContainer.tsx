@@ -14,6 +14,7 @@ interface MapContainerProps {
   onSelectCell: (properties: GridProperties) => void;
   selectedGridId: string | null;
   flyToLocation: { lon: number; lat: number; zoom?: number } | null;
+  isRealMode?: boolean;
 }
 
 // ESRI World Dark Gray Canvas basemap - 100% reliable, zero watermark, zero API key required
@@ -45,8 +46,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   onSelectCell,
   selectedGridId,
   flyToLocation,
+  isRealMode: propIsRealMode,
 }) => {
-  const isRealMode = (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
+  const isRealMode = propIsRealMode !== undefined
+    ? propIsRealMode
+    : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
   const mapRef = useRef<MapRef | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{
     x: number;
