@@ -11,10 +11,10 @@
 This report establishes the empirical real-data validation benchmark for Project VISHWAS across medium-range forecast horizons from Day 1 (D+1, +24h) to Day 9 (D+9, +216h). Prior phases validated Day 1 forecasts over August 2023 (Phase 1A) and extended across July, August, and September 2023 (Phase 1B). Phase 2A extends this empirical evaluation to medium-range lead times D2 through D9 across all three historical monsoon cohorts.
 
 Key empirical findings of this evaluation include:
-1. **Consistent Machine Learning Skill Across All Leads:** XGBoost residual error prediction demonstrates positive skill over the naive baseline (training-set median absolute error) across every lead day from D1 to D9. In the pooled multi-month models, XGBoost reduces MAE by +27.68% at D1, +21.90% at D2, +17.53% at D3, +14.21% at D4, +19.25% at D5, +2.14% at D6, +13.60% at D7, +12.05% at D8, and +21.16% at D9.
-2. **Non-Monotonic Lead-Time Error Dynamics:** Error growth does not degrade monotonically with lead time. In the observed 2023 monsoon test cohorts, error peaks around Day 5 and Day 6 (pooled MAE reaching 5.60 mm and 6.81 mm respectively, test bust prevalence peaking at 6.90%), coinciding with synoptic-scale monsoon low-pressure system transitions, before partially plateauing and stabilizing through Day 7–9 (MAE 5.14 mm–6.11 mm).
-3. **Split Conformal Prediction Reliability:** Calibrated split conformal prediction intervals (nominal 80%) provide valid marginal coverage at shorter leads (88.44% at D1, 88.08% at D2, 87.15% at D3, 83.21% at D4), but exhibit mild undercoverage at medium leads (71.52% at D6, 74.81% at D7, 73.72% at D8, 78.92% at D9) under strict chronological split conditions due to exchangeability degradation during active monsoon transitions.
-4. **Bust Alert Detection Performance:** Derived bust risk scoring (Rule B, threshold 0.70) consistently outperforms the operational single-point approximation (Rule A) in F1-score across early-to-medium leads (D1–D5), achieving peak F1 of 0.528 at D1 and 0.520 at D5.
+1. **Machine Learning Error Relative to Median Baseline:** The pooled evaluation shows lower MAE than the median baseline at every evaluated lead from D1 through D9. In the pooled multi-month models, XGBoost reduces MAE by +27.68% at D1, +21.90% at D2, +17.53% at D3, +14.21% at D4, +19.25% at D5, +2.14% at D6, +13.60% at D7, +12.05% at D8, and +21.16% at D9.
+2. **Non-Monotonic Lead-Time Error Dynamics:** The pooled test MAE is highest at D6 (6.81 mm) and decreases at D7–D9 (5.95, 6.11 and 5.14 mm respectively). The present evaluation does not establish a causal meteorological mechanism for this non-monotonic pattern.
+3. **Split Conformal Prediction Coverage:** Empirical marginal coverage falls below the nominal 80% level at D5–D8 in the pooled evaluation. Calibration/test distribution differences are a plausible diagnostic hypothesis, but causality is not established by this experiment.
+4. **Bust Alert Detection Performance:** In the pooled D1–D9 evaluation, Rule B has higher F1 than Rule A from D1 through D5, while Rule A has higher F1 than Rule B at D6–D9.
 5. **Rigorous Boundary Enforcements:** Empirical evaluation is strictly bounded to D1–D9. Day 10 (D+10) is withheld because the NOAA GFS historical archive does not provide the +243h endpoint at 3-hour resolution required to align with the IMD 03 UTC observation window. Fractions Skill Score (FSS) is preserved as a planned future spatial phase.
 
 ---
@@ -286,12 +286,12 @@ Table F presents the consolidated multi-lead reliability benchmark of VISHWAS fr
 ## 10. Regression Performance vs Lead Time
 
 The observed empirical measurements reveal the following regression error characteristics across forecast horizons:
-- **Baseline Error vs XGBoost Error:** Baseline MAE starts at 5.43 mm (D1) and 5.14 mm (D2), rises to 6.93 mm–6.96 mm at D5–D6, and ends at 6.51 mm at D9. XGBoost MAE starts at 3.93 mm (D1) and 4.01 mm (D2), reaches a maximum of 6.81 mm at D6, and stabilizes at 5.14 mm at D9.
-- **Skill Retention:** XGBoost delivers positive skill over the training baseline across all evaluated leads:
-  - Peak skill occurs at early leads: +27.68% at D1, +21.90% at D2, and +17.53% at D3.
-  - A secondary peak occurs at D9 (+21.16%), where NWP field smoothing allows tree-based error prediction to effectively capture spatial error climatology.
-  - The minimum skill occurs at D6 (+2.14%), representing the point of maximum synoptic forecast divergence during late August and late September convective episodes.
-- **RMSE Dynamics:** Baseline RMSE increases from 13.01 mm (D1) to 15.04 mm (D5) and 14.72 mm (D6), while XGBoost RMSE remains strictly superior across all leads (8.77 mm at D1, 8.91 mm at D2, peaking at 12.82 mm at D6, and declining to 10.36 mm at D9).
+- **Baseline Error vs XGBoost Error:** Baseline MAE starts at 5.43 mm (D1) and 5.14 mm (D2), rises to 6.93 mm–6.96 mm at D5–D6, and ends at 6.51 mm at D9. XGBoost MAE starts at 3.93 mm (D1) and 4.01 mm (D2), reaches a maximum of 6.81 mm at D6, and is 5.95 mm at D7, 6.11 mm at D8, and 5.14 mm at D9.
+- **Skill Retention:** The pooled evaluation shows lower MAE than the median baseline at every evaluated lead from D1 through D9:
+  - Relative MAE reduction is largest at D1 (+27.68%), D2 (+21.90%), D9 (+21.16%), and D5 (+19.25%).
+  - The lowest MAE reduction occurs at D6 (+2.14%).
+  - The pooled test MAE is highest at D6 (6.81 mm) and decreases at D7–D9 (5.95, 6.11 and 5.14 mm respectively). The present evaluation does not establish a causal meteorological mechanism for this non-monotonic pattern.
+- **RMSE Dynamics:** Baseline RMSE increases from 13.01 mm (D1) to 15.04 mm (D5) and 14.72 mm (D6), while XGBoost RMSE is 8.77 mm at D1, 8.91 mm at D2, 12.82 mm at D6, and 10.36 mm at D9.
 
 ---
 
@@ -299,12 +299,11 @@ The observed empirical measurements reveal the following regression error charac
 
 Bust detection rules demonstrate distinct operational trade-offs across lead times:
 - **Rule A (Operational Approximation: $\hat{e} > 25$ mm $\land$ $F > 10$ mm):**
-  - Maintains high precision across leads (e.g. 0.67 at D2 in July, 0.44–0.51 pooled), but recall drops as forecast rainfall values smooth out at longer horizons.
+  - Maintains precision between 0.435 and 0.511 across pooled leads, with recall ranging from 0.27 to 0.47.
   - F1-scores range between 0.332 (D2) and 0.488 (D5).
 - **Rule B (Derived Bust Risk Score $\ge 0.70$):**
   - Incorporates conformal uncertainty spread and forecast intensity.
-  - Consistently achieves superior F1 compared to Rule A at D1 (0.528 vs 0.462), D2 (0.437 vs 0.332), D3 (0.475 vs 0.388), D4 (0.474 vs 0.410), and D5 (0.520 vs 0.488).
-  - Yields higher balanced accuracy and Matthews Correlation Coefficients across medium ranges.
+  - In the pooled D1–D9 evaluation, Rule B has higher F1 than Rule A from D1 through D5, while Rule A has higher F1 than Rule B at D6–D9.
 - **Rule C (Conformal Upper Bound $> 25$ mm):**
   - Provides a conservative upper-envelope bound with recall exceeding 0.65 across most leads, making it suitable for risk-averse operational warning applications.
 
@@ -314,9 +313,8 @@ Bust detection rules demonstrate distinct operational trade-offs across lead tim
 
 Split Conformal Prediction (MAPIE, nominal 80%) shows clear dependency on forecast lead time:
 - **Coverage Stability at Short Leads:** At D1 (88.44%), D2 (88.08%), and D3 (87.15%), conformal intervals are conservative and satisfy nominal coverage with a comfortable safety margin.
-- **Exchangeability Degradation at Medium Leads:** As lead time extends to D5 (79.75%), D6 (71.52%), D7 (74.81%), and D8 (73.72%), empirical coverage drops below the nominal 80% mark.
-- **Exchangeability Diagnosis:** In a strict chronological partition, calibration and test sets encompass different calendar windows. At longer lead times, synoptic weather regimes shift between calibration and test periods, introducing non-exchangeable residual distributions.
-- **Interval Widths:** Mean interval widths remain well-controlled between 9.84 mm (D9) and 11.67 mm (D3), demonstrating that intervals do not artificially explode at long leads.
+- **Coverage at Medium Leads:** Empirical marginal coverage falls below the nominal 80% level at D5–D8 in the pooled evaluation. Calibration/test distribution differences are a plausible diagnostic hypothesis, but causality is not established by this experiment.
+- **Interval Widths:** Mean interval widths remain between 9.84 mm (D9) and 11.67 mm (D3).
 
 ---
 
@@ -411,7 +409,7 @@ FSS is retained as a planned spatial-verification phase. The current empirical p
 
 ## 17. Conclusions Strictly Supported by Measurements
 
-1. **The evaluation shows** that machine learning residual prediction maintains positive skill over naive baselines across all medium-range forecast days from D1 through D9.
-2. **The observed results indicate** that medium-range error growth during the Indian monsoon is non-monotonic, with maximum forecast divergence and bust prevalence occurring around D5–D6.
-3. **The measurements demonstrate** that Split Conformal Prediction provides well-calibrated bounds up to D3, but requires dynamic or adaptive exchangeability corrections when applied to extended leads (D6–D8).
-4. **The empirical data confirms** that derived risk scoring (Rule B) yields superior bust detection trade-offs compared to single-point operational rules across early and medium lead times.
+1. **The evaluation shows** that the pooled evaluation shows lower MAE than the median baseline at every evaluated lead from D1 through D9.
+2. **The observed results indicate** that the pooled test MAE is highest at D6 (6.81 mm) and decreases at D7–D9 (5.95, 6.11 and 5.14 mm respectively). The present evaluation does not establish a causal meteorological mechanism for this non-monotonic pattern.
+3. **The measurements demonstrate** that empirical marginal coverage falls below the nominal 80% level at D5–D8 in the pooled evaluation. Calibration/test distribution differences are a plausible diagnostic hypothesis, but causality is not established by this experiment.
+4. **The empirical data confirms** that in the pooled D1–D9 evaluation, Rule B has higher F1 than Rule A from D1 through D5, while Rule A has higher F1 than Rule B at D6–D9.
