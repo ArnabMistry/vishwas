@@ -1,0 +1,1629 @@
+{
+  "metadata": {
+    "evaluation_title": "VISHWAS Phase 1B: Multi-Month Real-Data Validation",
+    "cycle": "00:00 UTC cycle, D+1 forecast lead (+3h to +27h accumulation difference)",
+    "nwp_source": "NOAA Global Forecast System (GFS) 0.25\u00b0 Open Data",
+    "obs_source": "India Meteorological Department (IMD) 0.25\u00b0 Gridded Daily Rainfall",
+    "active_cells_per_day": 4905,
+    "feature_columns": [
+      "f_apcp_24h",
+      "f_cape",
+      "f_hgt_500",
+      "f_u_850",
+      "f_v_850",
+      "lat",
+      "lon"
+    ],
+    "target_column": "error_abs",
+    "conformal_method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+    "nominal_coverage_pct": 80.0,
+    "hyperparameters": {
+      "n_estimators": 100,
+      "max_depth": 5,
+      "learning_rate": 0.1,
+      "random_state": 42,
+      "tree_method": "hist"
+    },
+    "bust_truth_formula": "ABS(F - O) > 25.0 mm AND (F > 10.0 mm OR O > 10.0 mm)"
+  },
+  "datasets": {
+    "july_2023": {
+      "period": "July 2, 2023 \u2013 July 31, 2023",
+      "total_rows": 147150,
+      "total_busts": 15137,
+      "total_bust_prevalence_pct": 10.29
+    },
+    "august_2023": {
+      "period": "August 2, 2023 \u2013 August 31, 2023",
+      "total_rows": 147150,
+      "total_busts": 8030,
+      "total_bust_prevalence_pct": 5.46
+    },
+    "september_2023": {
+      "period": "September 1, 2023 \u2013 September 30, 2023",
+      "total_rows": 147150,
+      "total_busts": 7599,
+      "total_bust_prevalence_pct": 5.16
+    }
+  },
+  "experiment_a_monthly_replication": {
+    "july_2023": {
+      "context_label": "July 2023 Replication",
+      "sample_counts": {
+        "train": 98100,
+        "calib": 24525,
+        "test": 24525,
+        "test_busts": 2232,
+        "test_bust_prevalence_pct": 9.1
+      },
+      "regression": {
+        "baseline": {
+          "name": "Median Error Baseline (Train Set)",
+          "median_error_mm": 4.0474,
+          "mae": 8.3446,
+          "rmse": 18.7591
+        },
+        "overall_test": {
+          "mae": 6.2544,
+          "rmse": 12.36,
+          "mean_bias": 0.4691,
+          "median_absolute_error": 3.6546,
+          "max_absolute_error": 297.3966,
+          "mae_improvement_pct": 25.05,
+          "rmse_improvement_pct": 34.11
+        },
+        "bust_cases": {
+          "sample_count": 2232,
+          "mae": 24.5962,
+          "rmse": 35.388,
+          "mean_bias": -21.7688,
+          "median_absolute_error": 16.9479,
+          "max_absolute_error": 297.3966
+        },
+        "non_bust_cases": {
+          "sample_count": 22293,
+          "mae": 4.418,
+          "rmse": 6.5331,
+          "mean_bias": 2.6956,
+          "median_absolute_error": 3.2581,
+          "max_absolute_error": 137.0121
+        }
+      },
+      "conformal": {
+        "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+        "nominal_coverage_pct": 80.0,
+        "empirical_coverage_pct": 84.25,
+        "mean_interval_width": 16.3487,
+        "median_interval_width": 17.7167,
+        "min_interval_width": 7.7715,
+        "max_interval_width": 19.3925,
+        "bust_cases_diagnostic": {
+          "sample_count": 2232,
+          "empirical_coverage_pct": 28.09,
+          "mean_interval_width": 18.9572,
+          "median_interval_width": 19.3925,
+          "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+        },
+        "non_bust_cases_diagnostic": {
+          "sample_count": 22293,
+          "empirical_coverage_pct": 89.87,
+          "mean_interval_width": 16.0875,
+          "median_interval_width": 17.0661,
+          "diagnostic_note": "Diagnostic subgroup calculation only."
+        }
+      },
+      "bust_detection": {
+        "rule_a": {
+          "label": "Rule A: predicted_error > 25 mm & forecast > 10 mm",
+          "nature": "operational approximation; not identical to the ground-truth bust rule",
+          "metrics": {
+            "tp": 906,
+            "tn": 21982,
+            "fp": 311,
+            "fn": 1326,
+            "precision": 0.7445,
+            "recall": 0.4059,
+            "f1_score": 0.5254,
+            "accuracy": 0.9333,
+            "specificity": 0.986,
+            "balanced_accuracy": 0.696,
+            "matthews_corrcoef": 0.5191
+          }
+        },
+        "rule_b": {
+          "label": "Rule B: derived bust risk score >= 0.70",
+          "nature": "derived bust risk score; model-based risk indicator, not a calibrated probability",
+          "metrics": {
+            "tp": 1230,
+            "tn": 21373,
+            "fp": 920,
+            "fn": 1002,
+            "precision": 0.5721,
+            "recall": 0.5511,
+            "f1_score": 0.5614,
+            "accuracy": 0.9216,
+            "specificity": 0.9587,
+            "balanced_accuracy": 0.7549,
+            "matthews_corrcoef": 0.5185
+          }
+        },
+        "rule_c": {
+          "label": "Rule C: conformal upper bound > 25 mm",
+          "nature": "80% split conformal prediction interval upper bound exceeding 25 mm",
+          "metrics": {
+            "tp": 1449,
+            "tn": 19964,
+            "fp": 2329,
+            "fn": 783,
+            "precision": 0.3835,
+            "recall": 0.6492,
+            "f1_score": 0.4822,
+            "accuracy": 0.8731,
+            "specificity": 0.8955,
+            "balanced_accuracy": 0.7724,
+            "matthews_corrcoef": 0.434
+          }
+        }
+      },
+      "rainfall_stratification": {
+        "0\u201310 mm": {
+          "sample_count": 18618,
+          "pct_of_test_set": 75.91,
+          "mae": 3.632,
+          "rmse": 5.0014,
+          "mean_bias": 2.0757,
+          "bust_count": 718,
+          "bust_prevalence_pct": 3.86
+        },
+        "10\u201325 mm": {
+          "sample_count": 3436,
+          "pct_of_test_set": 14.01,
+          "mae": 7.4144,
+          "rmse": 8.8523,
+          "mean_bias": 2.2097,
+          "bust_count": 200,
+          "bust_prevalence_pct": 5.82
+        },
+        "25\u201350 mm": {
+          "sample_count": 1655,
+          "pct_of_test_set": 6.75,
+          "mae": 15.0331,
+          "rmse": 18.7549,
+          "mean_bias": -5.4928,
+          "bust_count": 607,
+          "bust_prevalence_pct": 36.68
+        },
+        "50\u2013100 mm": {
+          "sample_count": 600,
+          "pct_of_test_set": 2.45,
+          "mae": 33.0425,
+          "rmse": 38.1077,
+          "mean_bias": -24.4618,
+          "bust_count": 507,
+          "bust_prevalence_pct": 84.5
+        },
+        ">100 mm": {
+          "sample_count": 216,
+          "pct_of_test_set": 0.88,
+          "mae": 72.1622,
+          "rmse": 84.9351,
+          "mean_bias": -50.7643,
+          "bust_count": 200,
+          "bust_prevalence_pct": 92.59
+        }
+      }
+    },
+    "august_2023": {
+      "context_label": "August 2023 Phase 1A Authoritative Baseline",
+      "sample_counts": {
+        "train": 98100,
+        "calib": 24525,
+        "test": 24525,
+        "test_busts": 470,
+        "test_bust_prevalence_pct": 1.92
+      },
+      "regression": {
+        "baseline": {
+          "name": "Median Error Baseline (Train Set)",
+          "median_error_mm": 1.3297,
+          "mae": 3.0578,
+          "rmse": 8.4237
+        },
+        "overall_test": {
+          "mae": 2.67,
+          "rmse": 6.4008,
+          "mean_bias": 1.0402,
+          "median_absolute_error": 1.2004,
+          "max_absolute_error": 224.2881,
+          "mae_improvement_pct": 12.68,
+          "rmse_improvement_pct": 24.01
+        },
+        "bust_cases": {
+          "sample_count": 470,
+          "mae": 28.0739,
+          "rmse": 36.5709,
+          "mean_bias": -21.4622,
+          "median_absolute_error": 22.8532,
+          "max_absolute_error": 224.2881
+        },
+        "non_bust_cases": {
+          "sample_count": 24055,
+          "mae": 2.1737,
+          "rmse": 3.9546,
+          "mean_bias": 1.4799,
+          "median_absolute_error": 1.1608,
+          "max_absolute_error": 97.6593
+        }
+      },
+      "conformal": {
+        "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+        "nominal_coverage_pct": 80.0,
+        "empirical_coverage_pct": 90.99,
+        "mean_interval_width": 8.722,
+        "median_interval_width": 8.2566,
+        "min_interval_width": 4.292,
+        "max_interval_width": 11.861,
+        "bust_cases_diagnostic": {
+          "sample_count": 470,
+          "empirical_coverage_pct": 8.3,
+          "mean_interval_width": 11.5997,
+          "median_interval_width": 11.861,
+          "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+        },
+        "non_bust_cases_diagnostic": {
+          "sample_count": 24055,
+          "empirical_coverage_pct": 92.6,
+          "mean_interval_width": 8.6658,
+          "median_interval_width": 8.1815,
+          "diagnostic_note": "Diagnostic subgroup calculation only."
+        }
+      },
+      "bust_detection": {
+        "rule_a": {
+          "label": "Rule A: predicted_error > 25 mm & forecast > 10 mm",
+          "nature": "operational approximation; not identical to the ground-truth bust rule",
+          "metrics": {
+            "tp": 147,
+            "tn": 23950,
+            "fp": 105,
+            "fn": 323,
+            "precision": 0.5833,
+            "recall": 0.3128,
+            "f1_score": 0.4072,
+            "accuracy": 0.9825,
+            "specificity": 0.9956,
+            "balanced_accuracy": 0.6542,
+            "matthews_corrcoef": 0.4193
+          }
+        },
+        "rule_b": {
+          "label": "Rule B: derived bust risk score >= 0.70",
+          "nature": "derived bust risk score; model-based risk indicator, not a calibrated probability",
+          "metrics": {
+            "tp": 175,
+            "tn": 23789,
+            "fp": 266,
+            "fn": 295,
+            "precision": 0.3968,
+            "recall": 0.3723,
+            "f1_score": 0.3842,
+            "accuracy": 0.9771,
+            "specificity": 0.9889,
+            "balanced_accuracy": 0.6806,
+            "matthews_corrcoef": 0.3727
+          }
+        },
+        "rule_c": {
+          "label": "Rule C: conformal upper bound > 25 mm",
+          "nature": "80% split conformal prediction interval upper bound exceeding 25 mm",
+          "metrics": {
+            "tp": 179,
+            "tn": 23780,
+            "fp": 275,
+            "fn": 291,
+            "precision": 0.3943,
+            "recall": 0.3809,
+            "f1_score": 0.3874,
+            "accuracy": 0.9769,
+            "specificity": 0.9886,
+            "balanced_accuracy": 0.6847,
+            "matthews_corrcoef": 0.3757
+          }
+        }
+      },
+      "rainfall_stratification": {
+        "0\u201310 mm": {
+          "sample_count": 22734,
+          "pct_of_test_set": 92.7,
+          "mae": 1.7698,
+          "rmse": 2.7556,
+          "mean_bias": 1.4264,
+          "bust_count": 56,
+          "bust_prevalence_pct": 0.25
+        },
+        "10\u201325 mm": {
+          "sample_count": 999,
+          "pct_of_test_set": 4.07,
+          "mae": 7.256,
+          "rmse": 8.5222,
+          "mean_bias": 0.1967,
+          "bust_count": 44,
+          "bust_prevalence_pct": 4.4
+        },
+        "25\u201350 mm": {
+          "sample_count": 575,
+          "pct_of_test_set": 2.34,
+          "mae": 14.7624,
+          "rmse": 17.2235,
+          "mean_bias": -5.6821,
+          "bust_count": 202,
+          "bust_prevalence_pct": 35.13
+        },
+        "50\u2013100 mm": {
+          "sample_count": 174,
+          "pct_of_test_set": 0.71,
+          "mae": 36.2978,
+          "rmse": 39.8036,
+          "mean_bias": -9.5398,
+          "bust_count": 130,
+          "bust_prevalence_pct": 74.71
+        },
+        ">100 mm": {
+          "sample_count": 43,
+          "pct_of_test_set": 0.18,
+          "mae": 74.2989,
+          "rmse": 85.3665,
+          "mean_bias": -50.8454,
+          "bust_count": 38,
+          "bust_prevalence_pct": 88.37
+        }
+      }
+    },
+    "september_2023": {
+      "context_label": "September 2023 Replication",
+      "sample_counts": {
+        "train": 98100,
+        "calib": 24525,
+        "test": 24525,
+        "test_busts": 607,
+        "test_bust_prevalence_pct": 2.48
+      },
+      "regression": {
+        "baseline": {
+          "name": "Median Error Baseline (Train Set)",
+          "median_error_mm": 2.0619,
+          "mae": 4.3476,
+          "rmse": 8.0954
+        },
+        "overall_test": {
+          "mae": 2.7478,
+          "rmse": 5.6328,
+          "mean_bias": 0.1886,
+          "median_absolute_error": 1.4216,
+          "max_absolute_error": 94.5124,
+          "mae_improvement_pct": 36.8,
+          "rmse_improvement_pct": 30.42
+        },
+        "bust_cases": {
+          "sample_count": 607,
+          "mae": 23.5596,
+          "rmse": 27.8467,
+          "mean_bias": -23.1048,
+          "median_absolute_error": 20.9673,
+          "max_absolute_error": 94.5124
+        },
+        "non_bust_cases": {
+          "sample_count": 23918,
+          "mae": 2.2197,
+          "rmse": 3.5852,
+          "mean_bias": 0.7797,
+          "median_absolute_error": 1.3872,
+          "max_absolute_error": 57.6083
+        }
+      },
+      "conformal": {
+        "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+        "nominal_coverage_pct": 80.0,
+        "empirical_coverage_pct": 91.04,
+        "mean_interval_width": 10.0986,
+        "median_interval_width": 9.8171,
+        "min_interval_width": 4.5331,
+        "max_interval_width": 13.1912,
+        "bust_cases_diagnostic": {
+          "sample_count": 607,
+          "empirical_coverage_pct": 4.78,
+          "mean_interval_width": 12.6432,
+          "median_interval_width": 13.1912,
+          "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+        },
+        "non_bust_cases_diagnostic": {
+          "sample_count": 23918,
+          "empirical_coverage_pct": 93.23,
+          "mean_interval_width": 10.034,
+          "median_interval_width": 9.7096,
+          "diagnostic_note": "Diagnostic subgroup calculation only."
+        }
+      },
+      "bust_detection": {
+        "rule_a": {
+          "label": "Rule A: predicted_error > 25 mm & forecast > 10 mm",
+          "nature": "operational approximation; not identical to the ground-truth bust rule",
+          "metrics": {
+            "tp": 97,
+            "tn": 23910,
+            "fp": 8,
+            "fn": 510,
+            "precision": 0.9238,
+            "recall": 0.1598,
+            "f1_score": 0.2725,
+            "accuracy": 0.9789,
+            "specificity": 0.9997,
+            "balanced_accuracy": 0.5797,
+            "matthews_corrcoef": 0.3795
+          }
+        },
+        "rule_b": {
+          "label": "Rule B: derived bust risk score >= 0.70",
+          "nature": "derived bust risk score; model-based risk indicator, not a calibrated probability",
+          "metrics": {
+            "tp": 152,
+            "tn": 23847,
+            "fp": 71,
+            "fn": 455,
+            "precision": 0.6816,
+            "recall": 0.2504,
+            "f1_score": 0.3663,
+            "accuracy": 0.9786,
+            "specificity": 0.997,
+            "balanced_accuracy": 0.6237,
+            "matthews_corrcoef": 0.405
+          }
+        },
+        "rule_c": {
+          "label": "Rule C: conformal upper bound > 25 mm",
+          "nature": "80% split conformal prediction interval upper bound exceeding 25 mm",
+          "metrics": {
+            "tp": 168,
+            "tn": 23818,
+            "fp": 100,
+            "fn": 439,
+            "precision": 0.6269,
+            "recall": 0.2768,
+            "f1_score": 0.384,
+            "accuracy": 0.978,
+            "specificity": 0.9958,
+            "balanced_accuracy": 0.6363,
+            "matthews_corrcoef": 0.4074
+          }
+        }
+      },
+      "rainfall_stratification": {
+        "0\u201310 mm": {
+          "sample_count": 21891,
+          "pct_of_test_set": 89.26,
+          "mae": 1.7926,
+          "rmse": 2.8112,
+          "mean_bias": 0.839,
+          "bust_count": 186,
+          "bust_prevalence_pct": 0.85
+        },
+        "10\u201325 mm": {
+          "sample_count": 1790,
+          "pct_of_test_set": 7.3,
+          "mae": 6.7627,
+          "rmse": 8.0014,
+          "mean_bias": -0.1363,
+          "bust_count": 19,
+          "bust_prevalence_pct": 1.06
+        },
+        "25\u201350 mm": {
+          "sample_count": 687,
+          "pct_of_test_set": 2.8,
+          "mae": 14.3948,
+          "rmse": 17.3074,
+          "mean_bias": -10.8251,
+          "bust_count": 253,
+          "bust_prevalence_pct": 36.83
+        },
+        "50\u2013100 mm": {
+          "sample_count": 153,
+          "pct_of_test_set": 0.62,
+          "mae": 38.4796,
+          "rmse": 41.7364,
+          "mean_bias": -37.8633,
+          "bust_count": 145,
+          "bust_prevalence_pct": 94.77
+        },
+        ">100 mm": {
+          "sample_count": 4,
+          "pct_of_test_set": 0.02,
+          "mae": 66.8515,
+          "rmse": 67.5165,
+          "mean_bias": -66.8515,
+          "bust_count": 4,
+          "bust_prevalence_pct": 100.0
+        }
+      }
+    }
+  },
+  "experiment_b_pooled_model": {
+    "combined_test": {
+      "context_label": "Pooled Combined Test Set (15 days, 73,575 rows)",
+      "sample_counts": {
+        "test": 73575,
+        "test_busts": 3309,
+        "test_bust_prevalence_pct": 4.5
+      },
+      "regression": {
+        "baseline": {
+          "median_error_mm": 2.2876,
+          "mae": 5.4287,
+          "rmse": 13.0083
+        },
+        "overall_test": {
+          "mae": 3.9263,
+          "rmse": 8.7712,
+          "mean_bias": 0.6138,
+          "median_absolute_error": 2.0743,
+          "max_absolute_error": 298.2339,
+          "mae_improvement_pct": 27.68,
+          "rmse_improvement_pct": 32.57
+        }
+      },
+      "conformal": {
+        "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+        "nominal_coverage_pct": 80.0,
+        "empirical_coverage_pct": 88.44,
+        "mean_interval_width": 11.4719,
+        "median_interval_width": 11.3872,
+        "min_interval_width": 6.1103,
+        "max_interval_width": 14.5144,
+        "bust_cases_diagnostic": {
+          "sample_count": 3309,
+          "empirical_coverage_pct": 13.93,
+          "mean_interval_width": 14.2008,
+          "median_interval_width": 14.5144,
+          "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+        },
+        "non_bust_cases_diagnostic": {
+          "sample_count": 70266,
+          "empirical_coverage_pct": 91.95,
+          "mean_interval_width": 11.3434,
+          "median_interval_width": 11.1482,
+          "diagnostic_note": "Diagnostic subgroup calculation only."
+        }
+      },
+      "bust_detection": {
+        "rule_a": {
+          "label": "Rule A: predicted_error > 25 mm & forecast > 10 mm",
+          "metrics": {
+            "tp": 1096,
+            "tn": 69924,
+            "fp": 342,
+            "fn": 2213,
+            "precision": 0.7622,
+            "recall": 0.3312,
+            "f1_score": 0.4618,
+            "accuracy": 0.9653,
+            "specificity": 0.9951,
+            "balanced_accuracy": 0.6632,
+            "matthews_corrcoef": 0.4886
+          }
+        },
+        "rule_b": {
+          "label": "Rule B: derived bust risk score >= 0.70",
+          "metrics": {
+            "tp": 1568,
+            "tn": 69201,
+            "fp": 1065,
+            "fn": 1741,
+            "precision": 0.5955,
+            "recall": 0.4739,
+            "f1_score": 0.5278,
+            "accuracy": 0.9619,
+            "specificity": 0.9848,
+            "balanced_accuracy": 0.7294,
+            "matthews_corrcoef": 0.5118
+          }
+        },
+        "rule_c": {
+          "label": "Rule C: conformal upper bound > 25 mm",
+          "metrics": {
+            "tp": 1732,
+            "tn": 68745,
+            "fp": 1521,
+            "fn": 1577,
+            "precision": 0.5324,
+            "recall": 0.5234,
+            "f1_score": 0.5279,
+            "accuracy": 0.9579,
+            "specificity": 0.9784,
+            "balanced_accuracy": 0.7509,
+            "matthews_corrcoef": 0.5059
+          }
+        }
+      },
+      "rainfall_stratification": {
+        "0\u201310 mm": {
+          "sample_count": 63243,
+          "pct_of_test_set": 85.96,
+          "mae": 2.3599,
+          "rmse": 3.3084,
+          "mean_bias": 1.5279,
+          "bust_count": 960,
+          "bust_prevalence_pct": 1.52
+        },
+        "10\u201325 mm": {
+          "sample_count": 6225,
+          "pct_of_test_set": 8.46,
+          "mae": 7.1704,
+          "rmse": 8.5104,
+          "mean_bias": 1.0767,
+          "bust_count": 263,
+          "bust_prevalence_pct": 4.22
+        },
+        "25\u201350 mm": {
+          "sample_count": 2917,
+          "pct_of_test_set": 3.96,
+          "mae": 14.594,
+          "rmse": 18.2228,
+          "mean_bias": -7.074,
+          "bust_count": 1062,
+          "bust_prevalence_pct": 36.41
+        },
+        "50\u2013100 mm": {
+          "sample_count": 927,
+          "pct_of_test_set": 1.26,
+          "mae": 35.1823,
+          "rmse": 40.9797,
+          "mean_bias": -25.21,
+          "bust_count": 782,
+          "bust_prevalence_pct": 84.36
+        },
+        ">100 mm": {
+          "sample_count": 263,
+          "pct_of_test_set": 0.36,
+          "mae": 75.3065,
+          "rmse": 87.0282,
+          "mean_bias": -53.8682,
+          "bust_count": 242,
+          "bust_prevalence_pct": 92.02
+        }
+      }
+    },
+    "subsets": {
+      "july_test_subset": {
+        "context_label": "Pooled Model on July Test Set (5 days, 24,525 rows)",
+        "sample_counts": {
+          "test": 24525,
+          "test_busts": 2232,
+          "test_bust_prevalence_pct": 9.1
+        },
+        "regression": {
+          "baseline": {
+            "median_error_mm": 2.2876,
+            "mae": 8.5018,
+            "rmse": 19.3528
+          },
+          "overall_test": {
+            "mae": 5.8053,
+            "rmse": 12.6086,
+            "mean_bias": -0.2113,
+            "median_absolute_error": 2.9216,
+            "max_absolute_error": 298.2339,
+            "mae_improvement_pct": 31.72,
+            "rmse_improvement_pct": 34.85
+          }
+        },
+        "conformal": {
+          "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+          "nominal_coverage_pct": 80.0,
+          "empirical_coverage_pct": 79.52,
+          "mean_interval_width": 12.5428,
+          "median_interval_width": 14.4326,
+          "min_interval_width": 6.5184,
+          "max_interval_width": 14.5144,
+          "bust_cases_diagnostic": {
+            "sample_count": 2232,
+            "empirical_coverage_pct": 15.59,
+            "mean_interval_width": 14.311,
+            "median_interval_width": 14.5144,
+            "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+          },
+          "non_bust_cases_diagnostic": {
+            "sample_count": 22293,
+            "empirical_coverage_pct": 85.92,
+            "mean_interval_width": 12.3657,
+            "median_interval_width": 13.7328,
+            "diagnostic_note": "Diagnostic subgroup calculation only."
+          }
+        },
+        "bust_detection": {
+          "rule_a": {
+            "label": "Rule A: predicted_error > 25 mm & forecast > 10 mm",
+            "metrics": {
+              "tp": 851,
+              "tn": 22068,
+              "fp": 225,
+              "fn": 1381,
+              "precision": 0.7909,
+              "recall": 0.3813,
+              "f1_score": 0.5145,
+              "accuracy": 0.9345,
+              "specificity": 0.9899,
+              "balanced_accuracy": 0.6856,
+              "matthews_corrcoef": 0.5213
+            }
+          },
+          "rule_b": {
+            "label": "Rule B: derived bust risk score >= 0.70",
+            "metrics": {
+              "tp": 1215,
+              "tn": 21603,
+              "fp": 690,
+              "fn": 1017,
+              "precision": 0.6378,
+              "recall": 0.5444,
+              "f1_score": 0.5874,
+              "accuracy": 0.9304,
+              "specificity": 0.969,
+              "balanced_accuracy": 0.7567,
+              "matthews_corrcoef": 0.5517
+            }
+          },
+          "rule_c": {
+            "label": "Rule C: conformal upper bound > 25 mm",
+            "metrics": {
+              "tp": 1325,
+              "tn": 21290,
+              "fp": 1003,
+              "fn": 907,
+              "precision": 0.5692,
+              "recall": 0.5936,
+              "f1_score": 0.5811,
+              "accuracy": 0.9221,
+              "specificity": 0.955,
+              "balanced_accuracy": 0.7743,
+              "matthews_corrcoef": 0.5384
+            }
+          }
+        },
+        "rainfall_stratification": {
+          "0\u201310 mm": {
+            "sample_count": 18618,
+            "pct_of_test_set": 75.91,
+            "mae": 2.9935,
+            "rmse": 4.2098,
+            "mean_bias": 1.4888,
+            "bust_count": 718,
+            "bust_prevalence_pct": 3.86
+          },
+          "10\u201325 mm": {
+            "sample_count": 3436,
+            "pct_of_test_set": 14.01,
+            "mae": 7.266,
+            "rmse": 8.6775,
+            "mean_bias": 1.5936,
+            "bust_count": 200,
+            "bust_prevalence_pct": 5.82
+          },
+          "25\u201350 mm": {
+            "sample_count": 1655,
+            "pct_of_test_set": 6.75,
+            "mae": 14.8252,
+            "rmse": 19.1027,
+            "mean_bias": -6.4177,
+            "bust_count": 607,
+            "bust_prevalence_pct": 36.68
+          },
+          "50\u2013100 mm": {
+            "sample_count": 600,
+            "pct_of_test_set": 2.45,
+            "mae": 34.6169,
+            "rmse": 41.6586,
+            "mean_bias": -26.7134,
+            "bust_count": 507,
+            "bust_prevalence_pct": 84.5
+          },
+          ">100 mm": {
+            "sample_count": 216,
+            "pct_of_test_set": 0.88,
+            "mae": 75.7904,
+            "rmse": 87.7978,
+            "mean_bias": -54.2893,
+            "bust_count": 200,
+            "bust_prevalence_pct": 92.59
+          }
+        }
+      },
+      "august_test_subset": {
+        "context_label": "Pooled Model on August Test Set (5 days, 24,525 rows)",
+        "sample_counts": {
+          "test": 24525,
+          "test_busts": 470,
+          "test_bust_prevalence_pct": 1.92
+        },
+        "regression": {
+          "baseline": {
+            "median_error_mm": 2.2876,
+            "mae": 3.4069,
+            "rmse": 8.2853
+          },
+          "overall_test": {
+            "mae": 3.0029,
+            "rmse": 6.3487,
+            "mean_bias": 1.4648,
+            "median_absolute_error": 1.9247,
+            "max_absolute_error": 224.946,
+            "mae_improvement_pct": 11.86,
+            "rmse_improvement_pct": 23.37
+          }
+        },
+        "conformal": {
+          "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+          "nominal_coverage_pct": 80.0,
+          "empirical_coverage_pct": 94.01,
+          "mean_interval_width": 10.681,
+          "median_interval_width": 10.1825,
+          "min_interval_width": 6.1103,
+          "max_interval_width": 14.5144,
+          "bust_cases_diagnostic": {
+            "sample_count": 470,
+            "empirical_coverage_pct": 12.34,
+            "mean_interval_width": 14.0981,
+            "median_interval_width": 14.5144,
+            "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+          },
+          "non_bust_cases_diagnostic": {
+            "sample_count": 24055,
+            "empirical_coverage_pct": 95.6,
+            "mean_interval_width": 10.6142,
+            "median_interval_width": 10.1203,
+            "diagnostic_note": "Diagnostic subgroup calculation only."
+          }
+        },
+        "bust_detection": {
+          "rule_a": {
+            "label": "Rule A: predicted_error > 25 mm & forecast > 10 mm",
+            "metrics": {
+              "tp": 151,
+              "tn": 23950,
+              "fp": 105,
+              "fn": 319,
+              "precision": 0.5898,
+              "recall": 0.3213,
+              "f1_score": 0.416,
+              "accuracy": 0.9827,
+              "specificity": 0.9956,
+              "balanced_accuracy": 0.6585,
+              "matthews_corrcoef": 0.4275
+            }
+          },
+          "rule_b": {
+            "label": "Rule B: derived bust risk score >= 0.70",
+            "metrics": {
+              "tp": 180,
+              "tn": 23831,
+              "fp": 224,
+              "fn": 290,
+              "precision": 0.4455,
+              "recall": 0.383,
+              "f1_score": 0.4119,
+              "accuracy": 0.979,
+              "specificity": 0.9907,
+              "balanced_accuracy": 0.6868,
+              "matthews_corrcoef": 0.4025
+            }
+          },
+          "rule_c": {
+            "label": "Rule C: conformal upper bound > 25 mm",
+            "metrics": {
+              "tp": 194,
+              "tn": 23774,
+              "fp": 281,
+              "fn": 276,
+              "precision": 0.4084,
+              "recall": 0.4128,
+              "f1_score": 0.4106,
+              "accuracy": 0.9773,
+              "specificity": 0.9883,
+              "balanced_accuracy": 0.7005,
+              "matthews_corrcoef": 0.399
+            }
+          }
+        },
+        "rainfall_stratification": {
+          "0\u201310 mm": {
+            "sample_count": 22734,
+            "pct_of_test_set": 92.7,
+            "mae": 2.1519,
+            "rmse": 2.84,
+            "mean_bias": 1.8592,
+            "bust_count": 56,
+            "bust_prevalence_pct": 0.25
+          },
+          "10\u201325 mm": {
+            "sample_count": 999,
+            "pct_of_test_set": 4.07,
+            "mae": 7.1583,
+            "rmse": 8.4112,
+            "mean_bias": 0.5825,
+            "bust_count": 44,
+            "bust_prevalence_pct": 4.4
+          },
+          "25\u201350 mm": {
+            "sample_count": 575,
+            "pct_of_test_set": 2.34,
+            "mae": 14.3806,
+            "rmse": 16.8591,
+            "mean_bias": -5.2721,
+            "bust_count": 202,
+            "bust_prevalence_pct": 35.13
+          },
+          "50\u2013100 mm": {
+            "sample_count": 174,
+            "pct_of_test_set": 0.71,
+            "mae": 35.2383,
+            "rmse": 38.7671,
+            "mean_bias": -9.8357,
+            "bust_count": 130,
+            "bust_prevalence_pct": 74.71
+          },
+          ">100 mm": {
+            "sample_count": 43,
+            "pct_of_test_set": 0.18,
+            "mae": 73.8259,
+            "rmse": 84.8418,
+            "mean_bias": -50.7094,
+            "bust_count": 38,
+            "bust_prevalence_pct": 88.37
+          }
+        }
+      },
+      "september_test_subset": {
+        "context_label": "Pooled Model on September Test Set (5 days, 24,525 rows)",
+        "sample_counts": {
+          "test": 24525,
+          "test_busts": 607,
+          "test_bust_prevalence_pct": 2.48
+        },
+        "regression": {
+          "baseline": {
+            "median_error_mm": 2.2876,
+            "mae": 4.3774,
+            "rmse": 8.0295
+          },
+          "overall_test": {
+            "mae": 2.9705,
+            "rmse": 5.6143,
+            "mean_bias": 0.5879,
+            "median_absolute_error": 1.7597,
+            "max_absolute_error": 93.3275,
+            "mae_improvement_pct": 32.14,
+            "rmse_improvement_pct": 30.08
+          }
+        },
+        "conformal": {
+          "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+          "nominal_coverage_pct": 80.0,
+          "empirical_coverage_pct": 91.78,
+          "mean_interval_width": 11.1919,
+          "median_interval_width": 10.9238,
+          "min_interval_width": 6.5165,
+          "max_interval_width": 14.5144,
+          "bust_cases_diagnostic": {
+            "sample_count": 607,
+            "empirical_coverage_pct": 9.06,
+            "mean_interval_width": 13.8752,
+            "median_interval_width": 14.5144,
+            "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+          },
+          "non_bust_cases_diagnostic": {
+            "sample_count": 23918,
+            "empirical_coverage_pct": 93.88,
+            "mean_interval_width": 11.1238,
+            "median_interval_width": 10.798,
+            "diagnostic_note": "Diagnostic subgroup calculation only."
+          }
+        },
+        "bust_detection": {
+          "rule_a": {
+            "label": "Rule A: predicted_error > 25 mm & forecast > 10 mm",
+            "metrics": {
+              "tp": 94,
+              "tn": 23906,
+              "fp": 12,
+              "fn": 513,
+              "precision": 0.8868,
+              "recall": 0.1549,
+              "f1_score": 0.2637,
+              "accuracy": 0.9786,
+              "specificity": 0.9995,
+              "balanced_accuracy": 0.5772,
+              "matthews_corrcoef": 0.3656
+            }
+          },
+          "rule_b": {
+            "label": "Rule B: derived bust risk score >= 0.70",
+            "metrics": {
+              "tp": 173,
+              "tn": 23767,
+              "fp": 151,
+              "fn": 434,
+              "precision": 0.534,
+              "recall": 0.285,
+              "f1_score": 0.3716,
+              "accuracy": 0.9761,
+              "specificity": 0.9937,
+              "balanced_accuracy": 0.6393,
+              "matthews_corrcoef": 0.3792
+            }
+          },
+          "rule_c": {
+            "label": "Rule C: conformal upper bound > 25 mm",
+            "metrics": {
+              "tp": 213,
+              "tn": 23681,
+              "fp": 237,
+              "fn": 394,
+              "precision": 0.4733,
+              "recall": 0.3509,
+              "f1_score": 0.403,
+              "accuracy": 0.9743,
+              "specificity": 0.9901,
+              "balanced_accuracy": 0.6705,
+              "matthews_corrcoef": 0.3947
+            }
+          }
+        },
+        "rainfall_stratification": {
+          "0\u201310 mm": {
+            "sample_count": 21891,
+            "pct_of_test_set": 89.26,
+            "mae": 2.0371,
+            "rmse": 2.8588,
+            "mean_bias": 1.2172,
+            "bust_count": 186,
+            "bust_prevalence_pct": 0.85
+          },
+          "10\u201325 mm": {
+            "sample_count": 1790,
+            "pct_of_test_set": 7.3,
+            "mae": 6.9938,
+            "rmse": 8.2373,
+            "mean_bias": 0.3602,
+            "bust_count": 19,
+            "bust_prevalence_pct": 1.06
+          },
+          "25\u201350 mm": {
+            "sample_count": 687,
+            "pct_of_test_set": 2.8,
+            "mae": 14.2156,
+            "rmse": 17.1171,
+            "mean_bias": -10.163,
+            "bust_count": 253,
+            "bust_prevalence_pct": 36.83
+          },
+          "50\u2013100 mm": {
+            "sample_count": 153,
+            "pct_of_test_set": 0.62,
+            "mae": 37.3362,
+            "rmse": 40.7432,
+            "mean_bias": -36.7989,
+            "bust_count": 145,
+            "bust_prevalence_pct": 94.77
+          },
+          ">100 mm": {
+            "sample_count": 4,
+            "pct_of_test_set": 0.02,
+            "mae": 65.0897,
+            "rmse": 65.9372,
+            "mean_bias": -65.0897,
+            "bust_count": 4,
+            "bust_prevalence_pct": 100.0
+          }
+        }
+      }
+    }
+  },
+  "experiment_c_cross_month_transfer": {
+    "case_1_hold_out_july": {
+      "context_label": "Case 1: Hold Out July (Train: Aug+Sept)",
+      "sample_counts": {
+        "train": 196200,
+        "calib": 49050,
+        "test": 24525,
+        "test_busts": 2232,
+        "test_bust_prevalence_pct": 9.1
+      },
+      "regression": {
+        "baseline": {
+          "name": "Median Error Baseline (Train Set)",
+          "median_error_mm": 1.625,
+          "mae": 8.6823,
+          "rmse": 19.6126
+        },
+        "overall_test": {
+          "mae": 5.782,
+          "rmse": 12.971,
+          "mean_bias": -0.6457,
+          "median_absolute_error": 2.7708,
+          "max_absolute_error": 302.4197,
+          "mae_improvement_pct": 33.4,
+          "rmse_improvement_pct": 33.86
+        },
+        "bust_cases": {
+          "sample_count": 2232,
+          "mae": 26.5837,
+          "rmse": 38.7499,
+          "mean_bias": -25.1116,
+          "median_absolute_error": 18.1875,
+          "max_absolute_error": 302.4197
+        },
+        "non_bust_cases": {
+          "sample_count": 22293,
+          "mae": 3.6994,
+          "rmse": 5.8954,
+          "mean_bias": 1.8039,
+          "median_absolute_error": 2.4632,
+          "max_absolute_error": 92.6289
+        }
+      },
+      "conformal": {
+        "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+        "nominal_coverage_pct": 80.0,
+        "empirical_coverage_pct": 75.79,
+        "mean_interval_width": 10.6858,
+        "median_interval_width": 12.2356,
+        "min_interval_width": 5.5417,
+        "max_interval_width": 12.2356,
+        "bust_cases_diagnostic": {
+          "sample_count": 2232,
+          "empirical_coverage_pct": 10.93,
+          "mean_interval_width": 12.0556,
+          "median_interval_width": 12.2356,
+          "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+        },
+        "non_bust_cases_diagnostic": {
+          "sample_count": 22293,
+          "empirical_coverage_pct": 82.28,
+          "mean_interval_width": 10.5486,
+          "median_interval_width": 12.0328,
+          "diagnostic_note": "Diagnostic subgroup calculation only."
+        }
+      },
+      "bust_detection": {
+        "rule_a": {
+          "label": "Rule A: predicted_error > 25 mm & forecast > 10 mm",
+          "nature": "operational approximation; not identical to the ground-truth bust rule",
+          "metrics": {
+            "tp": 840,
+            "tn": 22050,
+            "fp": 243,
+            "fn": 1392,
+            "precision": 0.7756,
+            "recall": 0.3763,
+            "f1_score": 0.5068,
+            "accuracy": 0.9333,
+            "specificity": 0.9891,
+            "balanced_accuracy": 0.6827,
+            "matthews_corrcoef": 0.5116
+          }
+        },
+        "rule_b": {
+          "label": "Rule B: derived bust risk score >= 0.70",
+          "nature": "derived bust risk score; model-based risk indicator, not a calibrated probability",
+          "metrics": {
+            "tp": 1173,
+            "tn": 21656,
+            "fp": 637,
+            "fn": 1059,
+            "precision": 0.6481,
+            "recall": 0.5255,
+            "f1_score": 0.5804,
+            "accuracy": 0.9308,
+            "specificity": 0.9714,
+            "balanced_accuracy": 0.7485,
+            "matthews_corrcoef": 0.5467
+          }
+        },
+        "rule_c": {
+          "label": "Rule C: conformal upper bound > 25 mm",
+          "nature": "80% split conformal prediction interval upper bound exceeding 25 mm",
+          "metrics": {
+            "tp": 1205,
+            "tn": 21601,
+            "fp": 692,
+            "fn": 1027,
+            "precision": 0.6352,
+            "recall": 0.5399,
+            "f1_score": 0.5837,
+            "accuracy": 0.9299,
+            "specificity": 0.969,
+            "balanced_accuracy": 0.7544,
+            "matthews_corrcoef": 0.5478
+          }
+        }
+      },
+      "rainfall_stratification": {
+        "0\u201310 mm": {
+          "sample_count": 18618,
+          "pct_of_test_set": 75.91,
+          "mae": 2.867,
+          "rmse": 4.2142,
+          "mean_bias": 1.1973,
+          "bust_count": 718,
+          "bust_prevalence_pct": 3.86
+        },
+        "10\u201325 mm": {
+          "sample_count": 3436,
+          "pct_of_test_set": 14.01,
+          "mae": 7.3815,
+          "rmse": 9.3369,
+          "mean_bias": 1.1908,
+          "bust_count": 200,
+          "bust_prevalence_pct": 5.82
+        },
+        "25\u201350 mm": {
+          "sample_count": 1655,
+          "pct_of_test_set": 6.75,
+          "mae": 15.2532,
+          "rmse": 20.2076,
+          "mean_bias": -7.5206,
+          "bust_count": 607,
+          "bust_prevalence_pct": 36.68
+        },
+        "50\u2013100 mm": {
+          "sample_count": 600,
+          "pct_of_test_set": 2.45,
+          "mae": 35.6074,
+          "rmse": 43.4503,
+          "mean_bias": -28.668,
+          "bust_count": 507,
+          "bust_prevalence_pct": 84.5
+        },
+        ">100 mm": {
+          "sample_count": 216,
+          "pct_of_test_set": 0.88,
+          "mae": 76.1864,
+          "rmse": 88.3888,
+          "mean_bias": -58.1937,
+          "bust_count": 200,
+          "bust_prevalence_pct": 92.59
+        }
+      }
+    },
+    "case_2_hold_out_august": {
+      "context_label": "Case 2: Hold Out August (Train: July+Sept)",
+      "sample_counts": {
+        "train": 196200,
+        "calib": 49050,
+        "test": 24525,
+        "test_busts": 470,
+        "test_bust_prevalence_pct": 1.92
+      },
+      "regression": {
+        "baseline": {
+          "name": "Median Error Baseline (Train Set)",
+          "median_error_mm": 2.9798,
+          "mae": 3.7418,
+          "rmse": 8.2533
+        },
+        "overall_test": {
+          "mae": 3.9334,
+          "rmse": 7.05,
+          "mean_bias": 2.5233,
+          "median_absolute_error": 2.5169,
+          "max_absolute_error": 224.793,
+          "mae_improvement_pct": -5.12,
+          "rmse_improvement_pct": 14.58
+        },
+        "bust_cases": {
+          "sample_count": 470,
+          "mae": 25.9872,
+          "rmse": 34.5136,
+          "mean_bias": -20.0384,
+          "median_absolute_error": 21.3656,
+          "max_absolute_error": 224.793
+        },
+        "non_bust_cases": {
+          "sample_count": 24055,
+          "mae": 3.5025,
+          "rmse": 5.2344,
+          "mean_bias": 2.9641,
+          "median_absolute_error": 2.4521,
+          "max_absolute_error": 98.6454
+        }
+      },
+      "conformal": {
+        "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+        "nominal_coverage_pct": 80.0,
+        "empirical_coverage_pct": 88.69,
+        "mean_interval_width": 12.2276,
+        "median_interval_width": 11.9668,
+        "min_interval_width": 5.8906,
+        "max_interval_width": 16.0043,
+        "bust_cases_diagnostic": {
+          "sample_count": 470,
+          "empirical_coverage_pct": 15.53,
+          "mean_interval_width": 15.4863,
+          "median_interval_width": 16.0043,
+          "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+        },
+        "non_bust_cases_diagnostic": {
+          "sample_count": 24055,
+          "empirical_coverage_pct": 90.12,
+          "mean_interval_width": 12.1639,
+          "median_interval_width": 11.885,
+          "diagnostic_note": "Diagnostic subgroup calculation only."
+        }
+      },
+      "bust_detection": {
+        "rule_a": {
+          "label": "Rule A: predicted_error > 25 mm & forecast > 10 mm",
+          "nature": "operational approximation; not identical to the ground-truth bust rule",
+          "metrics": {
+            "tp": 161,
+            "tn": 23936,
+            "fp": 119,
+            "fn": 309,
+            "precision": 0.575,
+            "recall": 0.3426,
+            "f1_score": 0.4293,
+            "accuracy": 0.9825,
+            "specificity": 0.9951,
+            "balanced_accuracy": 0.6688,
+            "matthews_corrcoef": 0.4357
+          }
+        },
+        "rule_b": {
+          "label": "Rule B: derived bust risk score >= 0.70",
+          "nature": "derived bust risk score; model-based risk indicator, not a calibrated probability",
+          "metrics": {
+            "tp": 203,
+            "tn": 23679,
+            "fp": 376,
+            "fn": 267,
+            "precision": 0.3506,
+            "recall": 0.4319,
+            "f1_score": 0.387,
+            "accuracy": 0.9738,
+            "specificity": 0.9844,
+            "balanced_accuracy": 0.7081,
+            "matthews_corrcoef": 0.3759
+          }
+        },
+        "rule_c": {
+          "label": "Rule C: conformal upper bound > 25 mm",
+          "nature": "80% split conformal prediction interval upper bound exceeding 25 mm",
+          "metrics": {
+            "tp": 246,
+            "tn": 23457,
+            "fp": 598,
+            "fn": 224,
+            "precision": 0.2915,
+            "recall": 0.5234,
+            "f1_score": 0.3744,
+            "accuracy": 0.9665,
+            "specificity": 0.9751,
+            "balanced_accuracy": 0.7493,
+            "matthews_corrcoef": 0.375
+          }
+        }
+      },
+      "rainfall_stratification": {
+        "0\u201310 mm": {
+          "sample_count": 22734,
+          "pct_of_test_set": 92.7,
+          "mae": 3.156,
+          "rmse": 4.3626,
+          "mean_bias": 2.8916,
+          "bust_count": 56,
+          "bust_prevalence_pct": 0.25
+        },
+        "10\u201325 mm": {
+          "sample_count": 999,
+          "pct_of_test_set": 4.07,
+          "mae": 7.65,
+          "rmse": 9.2153,
+          "mean_bias": 1.7027,
+          "bust_count": 44,
+          "bust_prevalence_pct": 4.4
+        },
+        "25\u201350 mm": {
+          "sample_count": 575,
+          "pct_of_test_set": 2.34,
+          "mae": 13.9815,
+          "rmse": 16.4963,
+          "mean_bias": -3.8559,
+          "bust_count": 202,
+          "bust_prevalence_pct": 35.13
+        },
+        "50\u2013100 mm": {
+          "sample_count": 174,
+          "pct_of_test_set": 0.71,
+          "mae": 34.1972,
+          "rmse": 38.0179,
+          "mean_bias": -7.7053,
+          "bust_count": 130,
+          "bust_prevalence_pct": 74.71
+        },
+        ">100 mm": {
+          "sample_count": 43,
+          "pct_of_test_set": 0.18,
+          "mae": 71.7777,
+          "rmse": 82.611,
+          "mean_bias": -46.4564,
+          "bust_count": 38,
+          "bust_prevalence_pct": 88.37
+        }
+      }
+    },
+    "case_3_hold_out_september": {
+      "context_label": "Case 3: Hold Out September (Train: July+Aug)",
+      "sample_counts": {
+        "train": 196200,
+        "calib": 49050,
+        "test": 24525,
+        "test_busts": 607,
+        "test_bust_prevalence_pct": 2.48
+      },
+      "regression": {
+        "baseline": {
+          "name": "Median Error Baseline (Train Set)",
+          "median_error_mm": 2.4005,
+          "mae": 4.395,
+          "rmse": 7.9987
+        },
+        "overall_test": {
+          "mae": 3.293,
+          "rmse": 5.9775,
+          "mean_bias": 0.9536,
+          "median_absolute_error": 1.9887,
+          "max_absolute_error": 91.7147,
+          "mae_improvement_pct": 25.07,
+          "rmse_improvement_pct": 25.27
+        },
+        "bust_cases": {
+          "sample_count": 607,
+          "mae": 23.0376,
+          "rmse": 27.2617,
+          "mean_bias": -22.7144,
+          "median_absolute_error": 20.7109,
+          "max_absolute_error": 91.7147
+        },
+        "non_bust_cases": {
+          "sample_count": 23918,
+          "mae": 2.7919,
+          "rmse": 4.2162,
+          "mean_bias": 1.5543,
+          "median_absolute_error": 1.9361,
+          "max_absolute_error": 57.1353
+        }
+      },
+      "conformal": {
+        "method": "Split Conformal Prediction (MAPIE SplitConformalRegressor)",
+        "nominal_coverage_pct": 80.0,
+        "empirical_coverage_pct": 91.82,
+        "mean_interval_width": 11.9936,
+        "median_interval_width": 11.6308,
+        "min_interval_width": 6.8712,
+        "max_interval_width": 15.4462,
+        "bust_cases_diagnostic": {
+          "sample_count": 607,
+          "empirical_coverage_pct": 10.87,
+          "mean_interval_width": 14.7191,
+          "median_interval_width": 15.4462,
+          "diagnostic_note": "Diagnostic subgroup calculation only. Split conformal prediction guarantees apply marginally under exchangeability across the general sample space, not conditionally to post-hoc subsets selected by extreme forecast errors (>25 mm)."
+        },
+        "non_bust_cases_diagnostic": {
+          "sample_count": 23918,
+          "empirical_coverage_pct": 93.88,
+          "mean_interval_width": 11.9245,
+          "median_interval_width": 11.5367,
+          "diagnostic_note": "Diagnostic subgroup calculation only."
+        }
+      },
+      "bust_detection": {
+        "rule_a": {
+          "label": "Rule A: predicted_error > 25 mm & forecast > 10 mm",
+          "nature": "operational approximation; not identical to the ground-truth bust rule",
+          "metrics": {
+            "tp": 89,
+            "tn": 23894,
+            "fp": 24,
+            "fn": 518,
+            "precision": 0.7876,
+            "recall": 0.1466,
+            "f1_score": 0.2472,
+            "accuracy": 0.9779,
+            "specificity": 0.999,
+            "balanced_accuracy": 0.5728,
+            "matthews_corrcoef": 0.3341
+          }
+        },
+        "rule_b": {
+          "label": "Rule B: derived bust risk score >= 0.70",
+          "nature": "derived bust risk score; model-based risk indicator, not a calibrated probability",
+          "metrics": {
+            "tp": 177,
+            "tn": 23674,
+            "fp": 244,
+            "fn": 430,
+            "precision": 0.4204,
+            "recall": 0.2916,
+            "f1_score": 0.3444,
+            "accuracy": 0.9725,
+            "specificity": 0.9898,
+            "balanced_accuracy": 0.6407,
+            "matthews_corrcoef": 0.3366
+          }
+        },
+        "rule_c": {
+          "label": "Rule C: conformal upper bound > 25 mm",
+          "nature": "80% split conformal prediction interval upper bound exceeding 25 mm",
+          "metrics": {
+            "tp": 227,
+            "tn": 23480,
+            "fp": 438,
+            "fn": 380,
+            "precision": 0.3414,
+            "recall": 0.374,
+            "f1_score": 0.3569,
+            "accuracy": 0.9666,
+            "specificity": 0.9817,
+            "balanced_accuracy": 0.6778,
+            "matthews_corrcoef": 0.3402
+          }
+        }
+      },
+      "rainfall_stratification": {
+        "0\u201310 mm": {
+          "sample_count": 21891,
+          "pct_of_test_set": 89.26,
+          "mae": 2.3841,
+          "rmse": 3.5616,
+          "mean_bias": 1.6025,
+          "bust_count": 186,
+          "bust_prevalence_pct": 0.85
+        },
+        "10\u201325 mm": {
+          "sample_count": 1790,
+          "pct_of_test_set": 7.3,
+          "mae": 7.1958,
+          "rmse": 8.5202,
+          "mean_bias": 0.5549,
+          "bust_count": 19,
+          "bust_prevalence_pct": 1.06
+        },
+        "25\u201350 mm": {
+          "sample_count": 687,
+          "pct_of_test_set": 2.8,
+          "mae": 14.2041,
+          "rmse": 17.1087,
+          "mean_bias": -9.9758,
+          "bust_count": 253,
+          "bust_prevalence_pct": 36.83
+        },
+        "50\u2013100 mm": {
+          "sample_count": 153,
+          "pct_of_test_set": 0.62,
+          "mae": 37.0875,
+          "rmse": 40.4668,
+          "mean_bias": -36.4408,
+          "bust_count": 145,
+          "bust_prevalence_pct": 94.77
+        },
+        ">100 mm": {
+          "sample_count": 4,
+          "pct_of_test_set": 0.02,
+          "mae": 64.181,
+          "rmse": 65.2662,
+          "mean_bias": -64.181,
+          "bust_count": 4,
+          "bust_prevalence_pct": 100.0
+        }
+      }
+    }
+  }
+}
