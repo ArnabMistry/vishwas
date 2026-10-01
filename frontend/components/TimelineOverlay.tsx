@@ -49,6 +49,7 @@ export const TimelineOverlay: React.FC<TimelineOverlayProps> = ({
 
   return (
     <div
+      id="timeline-overlay"
       className={`absolute bottom-2 sm:bottom-3 z-20 bg-slate-950/95 border border-slate-700/80 backdrop-blur-md rounded-sm p-2 shadow-2xl select-none transition-all duration-200 ${
         isInspectorOpen
           ? "left-2 right-2 sm:left-4 sm:right-4 xl:left-[308px] xl:right-[408px] max-w-2xl mx-auto"

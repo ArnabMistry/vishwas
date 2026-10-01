@@ -99,7 +99,10 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
   ];
 
   return (
-    <aside className="absolute sm:top-16 bottom-0 sm:bottom-4 right-0 sm:right-3 w-full sm:w-[390px] max-h-[85vh] sm:max-h-none sm:h-auto bg-slate-900/98 sm:bg-slate-900/95 border-t sm:border border-slate-700/80 rounded-t-lg sm:rounded-sm backdrop-blur-md p-3.5 flex flex-col z-30 shadow-2xl overflow-hidden select-none">
+    <aside
+      id="region-inspector"
+      className="absolute sm:top-16 bottom-0 sm:bottom-4 right-0 sm:right-3 w-full sm:w-[390px] max-h-[85vh] sm:max-h-none sm:h-auto bg-slate-900/98 sm:bg-slate-900/95 border-t sm:border border-slate-700/80 rounded-t-lg sm:rounded-sm backdrop-blur-md p-3.5 flex flex-col z-30 shadow-2xl overflow-hidden select-none"
+    >
       {/* Header with Title & Coordinates */}
       <div className="flex items-start justify-between pb-2.5 border-b border-slate-800">
         <div>
@@ -228,7 +231,7 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
           <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-300">
               <TrendingDown className="w-3.5 h-3.5 text-primary" />
-              <span>{isRealMode ? "SPATIAL VERIFICATION (POOLED)" : "SPATIAL VERIFICATION"}</span>
+              <span>SPATIAL VERIFICATION &middot; POOLED</span>
             </div>
 
             <div className="flex items-center gap-1 font-mono text-[10px]">
@@ -257,6 +260,10 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
 
           {viewMode === "fss" ? (
             <div className="mt-2">
+              <div className="px-2 py-1 mb-1.5 bg-slate-900/90 border border-slate-800 rounded text-[10px] text-amber-300/90 font-mono flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                <span>Regional pooled metric — independent of selected grid cell.</span>
+              </div>
               <div className="flex items-center justify-between text-[10px] font-mono text-slate-400 mb-1">
                 <span>{isRealMode ? "Pooled Fractions Skill Score (10mm, 5x5)" : "Fractions Skill Score (FSS ≥ 0.5)"}</span>
                 <span className="text-rose-400">--- Limit: 0.5</span>

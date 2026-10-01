@@ -51,6 +51,7 @@ export const GlobalMetricsPanel: React.FC<GlobalMetricsPanelProps> = ({
 
   return (
     <aside
+      id="operations-panel"
       className={`absolute top-16 left-3 z-20 transition-all duration-200 select-none ${
         isCollapsed ? "w-11 h-11" : "w-64 xl:w-72 max-h-[calc(100vh-5rem)] flex flex-col"
       }`}

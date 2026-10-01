@@ -52,12 +52,118 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     ? propIsRealMode
     : (process.env.NEXT_PUBLIC_DATA_MODE || "").toUpperCase() === "REAL";
   const mapRef = useRef<MapRef | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const [hoverInfo, setHoverInfo] = useState<{
     x: number;
     y: number;
     properties: GridProperties;
   } | null>(null);
   const [cursor, setCursor] = useState<string>("auto");
+
+  // Collision-aware HUD tooltip positioning
+  const getTooltipStyle = useCallback((cursorX: number, cursorY: number): React.CSSProperties => {
+    const TOOLTIP_WIDTH = 268;
+    const TOOLTIP_HEIGHT = 135;
+    const GAP = 12;
+
+    const container = containerRef.current?.getBoundingClientRect();
+    const containerW = container ? container.width : (typeof window !== "undefined" ? window.innerWidth : 1000);
+    const containerH = container ? container.height : (typeof window !== "undefined" ? window.innerHeight : 800);
+    const containerL = container ? container.left : 0;
+    const containerT = container ? container.top : 0;
+
+    // Obstacle 1: Historical Overview panel (left side)
+    const leftEl = typeof document !== "undefined" ? document.getElementById("operations-panel") : null;
+    let safeLeft = GAP;
+    if (leftEl) {
+      const lr = leftEl.getBoundingClientRect();
+      safeLeft = Math.max(safeLeft, lr.right - containerL + GAP);
+    }
+
+    // Obstacle 2: Cell Inspector panel (right side)
+    const rightEl = typeof document !== "undefined" ? document.getElementById("region-inspector") : null;
+    let safeRight = containerW - GAP;
+    if (rightEl) {
+      const rr = rightEl.getBoundingClientRect();
+      safeRight = Math.min(safeRight, rr.left - containerL - GAP);
+    }
+
+    // Obstacle 3: Bottom forecast timeline/control bar
+    const bottomEl = typeof document !== "undefined" ? document.getElementById("timeline-overlay") : null;
+    let safeBottom = containerH - GAP;
+    let timelineLeft = 0;
+    let timelineRight = containerW;
+    if (bottomEl) {
+      const br = bottomEl.getBoundingClientRect();
+      safeBottom = Math.min(safeBottom, br.top - containerT - GAP);
+      timelineLeft = br.left - containerL;
+      timelineRight = br.right - containerL;
+    }
+
+    // Obstacle 4: Map zoom controls (top-right)
+    const zoomEl = containerRef.current?.querySelector(".maplibregl-ctrl-top-right") as HTMLElement | null;
+    let zoomLeft = containerW;
+    let zoomBottom = 0;
+    if (zoomEl) {
+      const zr = zoomEl.getBoundingClientRect();
+      zoomLeft = zr.left - containerL - GAP;
+      zoomBottom = zr.bottom - containerT + GAP;
+    }
+
+    // 1. Determine Horizontal Position
+    // Prefer below/right of cursor:
+    const posXRight = cursorX + 16;
+    const collidesRight =
+      posXRight + TOOLTIP_WIDTH > safeRight ||
+      (cursorY < zoomBottom && posXRight + TOOLTIP_WIDTH > zoomLeft);
+
+    const posXLeft = cursorX - TOOLTIP_WIDTH - 16;
+    const collidesLeft = posXLeft < safeLeft;
+
+    let posX = posXRight;
+    if (collidesRight && !collidesLeft) {
+      // Flip to left side of cursor
+      posX = posXLeft;
+    } else if (collidesRight && collidesLeft) {
+      // Free corridor is tight: clamp within safe corridor
+      posX = Math.max(safeLeft, Math.min(safeRight - TOOLTIP_WIDTH, posXRight));
+    } else if (posXRight < safeLeft) {
+      // Cursor is near or overlapping left panel: flip/shift to right of left panel
+      posX = safeLeft;
+    }
+
+    // Final horizontal clamp to safe corridor
+    const maxAvailableX = Math.max(safeLeft, safeRight - TOOLTIP_WIDTH);
+    if (posX > maxAvailableX) posX = maxAvailableX;
+    if (posX < safeLeft) posX = safeLeft;
+
+    // 2. Determine Vertical Position
+    // Prefer below cursor:
+    let posY = cursorY + 16;
+
+    // Check collision with timeline if tooltip is in horizontal timeline span
+    const inTimelineX = posX + TOOLTIP_WIDTH > timelineLeft && posX < timelineRight;
+    const effectiveBottom = inTimelineX ? safeBottom : containerH - GAP;
+
+    if (posY + TOOLTIP_HEIGHT > effectiveBottom) {
+      // Flip to above cursor
+      posY = cursorY - TOOLTIP_HEIGHT - 16;
+    }
+
+    // Clamp vertically
+    const safeTop = GAP;
+    if (posY < safeTop) {
+      posY = safeTop;
+    }
+    if (posY + TOOLTIP_HEIGHT > effectiveBottom) {
+      posY = Math.max(safeTop, effectiveBottom - TOOLTIP_HEIGHT);
+    }
+
+    return {
+      left: `${Math.round(posX)}px`,
+      top: `${Math.round(posY)}px`,
+    };
+  }, []);
 
   // Handle external flyTo trigger (e.g. from GlobalMetricsPanel alert click)
   useEffect(() => {
@@ -109,11 +215,15 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     [onSelectCell]
   );
 
-  // Hover handler
+  // Hover handler specifically bound to forecast grid cell features
   const handleMouseMove = useCallback(
-    (event: { features?: Array<{ properties?: Record<string, unknown> }>; point: { x: number; y: number } }) => {
+    (event: { features?: Array<{ properties?: Record<string, unknown>; layer?: { id?: string } }>; point: { x: number; y: number } }) => {
       const { features, point } = event;
-      const hoveredFeature = features && features[0];
+      // Strictly verify that the feature belongs to the forecast grid layer and has a valid grid_id
+      const hoveredFeature = features && features.find(
+        (f) => f.layer?.id === "bust-layer" && Boolean((f.properties as unknown as GridProperties)?.grid_id)
+      );
+
       if (hoveredFeature && hoveredFeature.properties) {
         setCursor("pointer");
         setHoverInfo({
@@ -133,6 +243,109 @@ export const MapContainer: React.FC<MapContainerProps> = ({
     setCursor("auto");
     setHoverInfo(null);
   }, []);
+
+  // Dismiss hover tooltip immediately if cursor enters fixed UI overlays or leaves window
+  useEffect(() => {
+    const handleGlobalPointerMove = (e: PointerEvent) => {
+      const target = e.target as Element | null;
+      if (
+        target &&
+        target.closest(
+          "#operations-panel, #region-inspector, #timeline-overlay, .maplibregl-ctrl, .maplibregl-ctrl-group"
+        )
+      ) {
+        setHoverInfo(null);
+        setCursor("auto");
+      }
+    };
+
+    const handleWindowBlur = () => {
+      setHoverInfo(null);
+      setCursor("auto");
+    };
+
+    window.addEventListener("pointermove", handleGlobalPointerMove, { passive: true });
+    window.addEventListener("blur", handleWindowBlur);
+    document.addEventListener("mouseleave", handleWindowBlur);
+
+    return () => {
+      window.removeEventListener("pointermove", handleGlobalPointerMove);
+      window.removeEventListener("blur", handleWindowBlur);
+      document.removeEventListener("mouseleave", handleWindowBlur);
+    };
+  }, []);
+
+  // MapLibre layer-specific event bindings for 'bust-layer'
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map) return;
+
+    const layerId = "bust-layer";
+
+    const onGridMouseMove = (e: maplibregl.MapLayerMouseEvent) => {
+      const feature = e.features && e.features[0];
+      if (feature && feature.properties) {
+        const props = feature.properties as unknown as GridProperties;
+        if (props.grid_id) {
+          setCursor("pointer");
+          setHoverInfo({
+            x: e.point.x,
+            y: e.point.y,
+            properties: props,
+          });
+          return;
+        }
+      }
+      setCursor("auto");
+      setHoverInfo(null);
+    };
+
+    const onGridMouseLeave = () => {
+      setCursor("auto");
+      setHoverInfo(null);
+    };
+
+    const onMapMouseMove = (e: maplibregl.MapMouseEvent) => {
+      try {
+        const features = map.queryRenderedFeatures(e.point, { layers: [layerId] });
+        if (!features || features.length === 0) {
+          setCursor("auto");
+          setHoverInfo(null);
+        }
+      } catch {
+        // layer might not be initialized yet
+      }
+    };
+
+    const attachListeners = () => {
+      if (map.getLayer(layerId)) {
+        map.off("mousemove", layerId, onGridMouseMove);
+        map.off("mouseleave", layerId, onGridMouseLeave);
+        map.off("mousemove", onMapMouseMove);
+        map.off("mouseout", onGridMouseLeave);
+
+        map.on("mousemove", layerId, onGridMouseMove);
+        map.on("mouseleave", layerId, onGridMouseLeave);
+        map.on("mousemove", onMapMouseMove);
+        map.on("mouseout", onGridMouseLeave);
+      }
+    };
+
+    attachListeners();
+    map.on("styledata", attachListeners);
+
+    return () => {
+      try {
+        map.off("mousemove", layerId, onGridMouseMove);
+        map.off("mouseleave", layerId, onGridMouseLeave);
+        map.off("mousemove", onMapMouseMove);
+        map.off("mouseout", onGridMouseLeave);
+        map.off("styledata", attachListeners);
+      } catch {
+        // map cleanup
+      }
+    };
+  }, [gridData]);
 
   // MapLibre Fill Layer for Conformalized Forecast Reliability Field (CFRF)
   const fillLayerStyle: LayerProps = useMemo(
@@ -189,7 +402,7 @@ export const MapContainer: React.FC<MapContainerProps> = ({
   );
 
   return (
-    <div className="relative w-full h-full bg-[#080D1A] overflow-hidden">
+    <div ref={containerRef} className="relative w-full h-full bg-[#080D1A] overflow-hidden">
       <Map
         ref={mapRef}
         mapLib={maplibregl}
@@ -286,15 +499,11 @@ export const MapContainer: React.FC<MapContainerProps> = ({
         )}
       </Map>
 
-      {/* Lightweight HUD Tooltip on Hover with Boundary Clamping */}
+      {/* Lightweight HUD Tooltip on Hover with Collision-Aware Boundary Positioning */}
       {hoverInfo && (
         <div
-          className="pointer-events-none absolute z-40 bg-slate-950/95 border border-slate-700/90 rounded-sm p-2 shadow-2xl backdrop-blur-md text-[11px] font-mono text-slate-200"
-          style={{
-            left: `${Math.min(Math.max(hoverInfo.x, 150), typeof window !== "undefined" ? window.innerWidth - 240 : 800)}px`,
-            top: `${hoverInfo.y < 140 ? hoverInfo.y + 24 : hoverInfo.y - 12}px`,
-            transform: hoverInfo.y < 140 ? "translate(-50%, 0)" : "translate(-50%, -100%)",
-          }}
+          className="pointer-events-none absolute z-40 bg-slate-950/95 border border-slate-700/90 rounded-sm p-2 shadow-2xl backdrop-blur-md text-[11px] font-mono text-slate-200 w-[268px]"
+          style={getTooltipStyle(hoverInfo.x, hoverInfo.y)}
         >
           <div className="flex items-center justify-between gap-3 text-slate-400 pb-1 border-b border-slate-800 text-[10px]">
             <span>[{Number(hoverInfo.properties.lat).toFixed(1)}&deg;N, {Number(hoverInfo.properties.lon).toFixed(1)}&deg;E]</span>
