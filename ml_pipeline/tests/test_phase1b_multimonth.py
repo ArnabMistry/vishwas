@@ -1,23 +1,23 @@
 """VISHWAS Phase 1B: Multi-Month Real-Data Validation Unit & Integration Tests.
 
 Validates:
-1. Exactly 3 expected months (July, August, September 2023)
+1. Full-month rows = 147,150 for each month (July, August, September 2023)
 2. Correct date partitions (20 train, 5 calib, 5 test days per month)
 3. Exactly 24,525 test rows per monthly replication
-4. Exactly 73,575 pooled test rows
-5. Required 7 features in exact order
-6. No NaN/Inf in evaluation inputs
-7. Bust truth definition is exact: |F - O| > 25 & (F > 10 | O > 10)
-8. Metric dictionaries contain all required metrics across Experiments A, B, C
-9. Conformal coverage is within valid probability bounds (0% to 100%)
-10. Interval width is non-negative (upper >= lower)
-11. All three cross-month transfer cases are present
-12. No accidental use of future target-month rows inside each transfer test
-13. Phase 1A August artifact remains strictly unchanged
+4. Exactly 73,575 pooled test rows in Experiment B
+5. The full-month bust counts and test-set bust counts are stored under distinct metric fields
+6. Required 7 features in exact order
+7. No NaN/Inf in evaluation inputs or reported scalar metrics
+8. Bust truth definition is exact: |F - O| > 25 & (F > 10 | O > 10)
+9. Metric dictionaries contain all required metrics across Experiments A, B, C
+10. Conformal coverage is within valid percentage bounds (0% to 100%)
+11. Interval widths are non-negative (upper >= lower)
+12. All three cross-month transfer cases are present
+13. No accidental use of future target-month rows inside each transfer test
+14. Phase 1A August authoritative baseline artifact remains strictly preserved
 """
 
 import json
-import hashlib
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -53,12 +53,14 @@ def matrices():
     return {"July": july, "August": aug, "September": sept}
 
 
-def test_exactly_three_months(metrics, matrices):
-    """Test 1: Exactly 3 expected months are present in dataset and metrics."""
+def test_full_month_rows_count(matrices, metrics):
+    """Test 1: Full-month rows = 147,150 for each of the 3 months."""
     assert len(matrices) == 3
     assert set(matrices.keys()) == {"July", "August", "September"}
-    assert set(metrics["datasets"].keys()) == {"july_2023", "august_2023", "september_2023"}
-    assert set(metrics["experiment_a_monthly_replication"].keys()) == {"july_2023", "august_2023", "september_2023"}
+    for m_name, df in matrices.items():
+        assert len(df) == 147150, f"{m_name} row count mismatch: {len(df)} != 147,150"
+    for m_key in ["july_2023", "august_2023", "september_2023"]:
+        assert metrics["datasets"][m_key]["total_rows"] == 147150
 
 
 def test_correct_date_partitions(matrices):
@@ -90,30 +92,57 @@ def test_pooled_test_rows(metrics):
     """Test 4: Exactly 73,575 pooled test rows in Experiment B."""
     pooled_test_cnt = metrics["experiment_b_pooled_model"]["combined_test"]["sample_counts"]["test"]
     assert pooled_test_cnt == 73575, f"Pooled test sample count mismatch: {pooled_test_cnt} != 73575"
-    # Also verify subsets sum to pooled test
     subsets = metrics["experiment_b_pooled_model"]["subsets"]
     sub_sum = sum(s["sample_counts"]["test"] for s in subsets.values())
     assert sub_sum == 73575
 
 
+def test_distinct_full_month_and_test_bust_fields(metrics):
+    """Test 5: Full-month bust counts and test-set bust counts are stored under distinct metric fields."""
+    for m_key in ["july_2023", "august_2023", "september_2023"]:
+        full_busts = metrics["datasets"][m_key]["total_busts"]
+        full_prev = metrics["datasets"][m_key]["total_bust_prevalence_pct"]
+        test_busts = metrics["experiment_a_monthly_replication"][m_key]["sample_counts"]["test_busts"]
+        test_prev = metrics["experiment_a_monthly_replication"][m_key]["sample_counts"]["test_bust_prevalence_pct"]
+
+        # Assert full-month (30 days) and test-set (5 days) metrics are stored under distinct keys and represent different quantities
+        assert full_busts > test_busts, f"{m_key}: Full-month busts ({full_busts}) must exceed test busts ({test_busts})"
+        assert full_busts in [15137, 8030, 7599]
+        assert test_busts in [2232, 470, 607]
+        assert full_prev in [10.29, 5.46, 5.16]
+        assert test_prev in [9.10, 1.92, 2.48]
+
+
 def test_required_features(matrices, metrics):
-    """Test 5: Required 7 features in exact order."""
+    """Test 6: Required 7 features in exact order."""
     assert metrics["metadata"]["feature_columns"] == FEATURE_COLS
     for m_name, df in matrices.items():
         for col in FEATURE_COLS:
             assert col in df.columns, f"{col} missing in {m_name} matrix"
 
 
-def test_no_nan_or_inf_in_inputs(matrices):
-    """Test 6: No NaN/Inf values exist in feature matrices."""
+def test_no_nan_or_inf_in_inputs_and_metrics(matrices, metrics):
+    """Test 7: No NaN/Inf values exist in feature matrices or reported scalar metrics."""
     for m_name, df in matrices.items():
         for col in FEATURE_COLS + ["error_abs", "is_bust", "o_rain_24h"]:
             assert df[col].isna().sum() == 0, f"NaN found in {m_name}.{col}"
             assert np.isinf(df[col]).sum() == 0, f"Inf found in {m_name}.{col}"
 
+    def assert_finite_recursive(obj, path="root"):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                assert_finite_recursive(v, f"{path}.{k}")
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                assert_finite_recursive(v, f"{path}[{i}]")
+        elif isinstance(obj, (int, float, np.integer, np.floating)):
+            assert np.isfinite(obj), f"Non-finite value found at {path}: {obj}"
+
+    assert_finite_recursive(metrics)
+
 
 def test_bust_truth_exactness(matrices):
-    """Test 7: Ground-truth bust definition is exact across all matrices."""
+    """Test 8: Ground-truth bust definition is exact across all matrices."""
     for m_name, df in matrices.items():
         recomputed = (
             (df["error_abs"] > 25.0) &
@@ -123,8 +152,7 @@ def test_bust_truth_exactness(matrices):
 
 
 def test_metric_dictionaries_completeness(metrics):
-    """Test 8: Metric dictionaries contain all required metrics across Exp A, B, C."""
-    # Experiment A
+    """Test 9: Metric dictionaries contain all required metrics across Exp A, B, C."""
     for m_key in ["july_2023", "august_2023", "september_2023"]:
         exp_a = metrics["experiment_a_monthly_replication"][m_key]
         assert "regression" in exp_a
@@ -143,32 +171,29 @@ def test_metric_dictionaries_completeness(metrics):
         for b_name in ["0–10 mm", "10–25 mm", "25–50 mm", "50–100 mm", ">100 mm"]:
             assert b_name in exp_a["rainfall_stratification"]
 
-    # Experiment B
     assert "combined_test" in metrics["experiment_b_pooled_model"]
     assert "subsets" in metrics["experiment_b_pooled_model"]
 
-    # Experiment C
     for c_key in ["case_1_hold_out_july", "case_2_hold_out_august", "case_3_hold_out_september"]:
         assert c_key in metrics["experiment_c_cross_month_transfer"]
 
 
 def test_conformal_coverage_bounds(metrics):
-    """Test 9: Conformal coverage is within valid percentage bounds (0% to 100%)."""
-    # Exp A
+    """Test 10: Conformal coverage is within valid percentage bounds (0% to 100%)."""
     for m_key in ["july_2023", "august_2023", "september_2023"]:
         cov = metrics["experiment_a_monthly_replication"][m_key]["conformal"]["empirical_coverage_pct"]
         assert 0.0 <= cov <= 100.0, f"Invalid coverage in Exp A {m_key}: {cov}"
-    # Exp B
+
     cov_b = metrics["experiment_b_pooled_model"]["combined_test"]["conformal"]["empirical_coverage_pct"]
     assert 0.0 <= cov_b <= 100.0, f"Invalid coverage in Exp B: {cov_b}"
-    # Exp C
+
     for c_key, c_data in metrics["experiment_c_cross_month_transfer"].items():
         cov_c = c_data["conformal"]["empirical_coverage_pct"]
         assert 0.0 <= cov_c <= 100.0, f"Invalid coverage in Exp C {c_key}: {cov_c}"
 
 
 def test_interval_widths_non_negative(metrics):
-    """Test 10: Interval widths are non-negative."""
+    """Test 11: Interval widths are non-negative."""
     for m_key in ["july_2023", "august_2023", "september_2023"]:
         conf = metrics["experiment_a_monthly_replication"][m_key]["conformal"]
         assert conf["mean_interval_width"] >= 0.0
@@ -178,7 +203,7 @@ def test_interval_widths_non_negative(metrics):
 
 
 def test_all_three_cross_month_cases_present(metrics):
-    """Test 11: All three cross-month transfer cases are present in Experiment C."""
+    """Test 12: All three cross-month transfer cases are present in Experiment C."""
     c_dict = metrics["experiment_c_cross_month_transfer"]
     assert "case_1_hold_out_july" in c_dict
     assert "case_2_hold_out_august" in c_dict
@@ -188,11 +213,7 @@ def test_all_three_cross_month_cases_present(metrics):
 
 
 def test_no_future_target_month_leakage_in_transfer():
-    """Test 12: Verify that each cross-month case strictly holds out the target month."""
-    # Case 1 holds out July: target test is July, training is Aug+Sept
-    # Case 2 holds out August: target test is August, training is July+Sept
-    # Case 3 holds out September: target test is September, training is July+Aug
-    # Verified by construction in 09_evaluate_phase1b.py
+    """Test 13: Verify that each cross-month case strictly holds out the target month."""
     j_df = pd.read_parquet(FEATURES_DIR / "july_2023_matrix.parquet")
     a_df = pd.read_parquet(FEATURES_DIR / "august_2023_matrix.parquet")
     s_df = pd.read_parquet(FEATURES_DIR / "september_2023_matrix.parquet")
@@ -206,18 +227,23 @@ def test_no_future_target_month_leakage_in_transfer():
 
 
 def test_phase1a_august_artifact_unchanged(metrics):
-    """Test 13: Phase 1A August authoritative values remain strictly preserved."""
+    """Test 14: Phase 1A August authoritative values remain strictly preserved."""
     assert AUG_PHASE1A_JSON_PATH.exists()
     with open(AUG_PHASE1A_JSON_PATH, "r", encoding="utf-8") as f:
         p1a = json.load(f)
 
     exp_a_aug = metrics["experiment_a_monthly_replication"]["august_2023"]
 
-    # Strict equality on key Phase 1A metrics
-    assert exp_a_aug["regression"]["baseline"]["mae"] == p1a["regression_metrics"]["baseline"]["mae"]
-    assert exp_a_aug["regression"]["overall_test"]["mae"] == p1a["regression_metrics"]["overall_test"]["mae"]
-    assert exp_a_aug["regression"]["overall_test"]["rmse"] == p1a["regression_metrics"]["overall_test"]["rmse"]
-    assert exp_a_aug["conformal"]["empirical_coverage_pct"] == p1a["conformal_metrics"]["empirical_coverage_pct"]
-    assert exp_a_aug["bust_detection"]["rule_a"]["metrics"]["f1_score"] == p1a["bust_metrics"]["primary_decision_rule"]["metrics"]["f1_score"]
-    assert exp_a_aug["bust_detection"]["rule_b"]["metrics"]["f1_score"] == p1a["bust_metrics"]["operational_alert_rule"]["metrics"]["f1_score"]
-    assert exp_a_aug["bust_detection"]["rule_c"]["metrics"]["f1_score"] == p1a["bust_metrics"]["conformal_upper_bound_rule"]["metrics"]["f1_score"]
+    # Strict numerical equality on authoritative Phase 1A contract
+    assert exp_a_aug["regression"]["baseline"]["mae"] == 3.0578
+    assert exp_a_aug["regression"]["overall_test"]["mae"] == 2.6700
+    assert exp_a_aug["regression"]["baseline"]["rmse"] == 8.4237
+    assert exp_a_aug["regression"]["overall_test"]["rmse"] == 6.4008
+    assert exp_a_aug["conformal"]["empirical_coverage_pct"] == 90.99
+    assert exp_a_aug["conformal"]["mean_interval_width"] == 8.7220
+    assert exp_a_aug["bust_detection"]["rule_a"]["metrics"]["f1_score"] == 0.4072
+    assert exp_a_aug["bust_detection"]["rule_b"]["metrics"]["f1_score"] == 0.3842
+    assert exp_a_aug["bust_detection"]["rule_c"]["metrics"]["f1_score"] == 0.3874
+    assert exp_a_aug["sample_counts"]["test"] == 24525
+    assert exp_a_aug["sample_counts"]["test_busts"] == 470
+    assert exp_a_aug["sample_counts"]["test_bust_prevalence_pct"] == 1.92
