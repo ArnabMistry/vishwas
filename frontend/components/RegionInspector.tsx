@@ -8,7 +8,9 @@ import {
   TrendingDown,
   ShieldAlert,
   Gauge,
-  RefreshCw
+  RefreshCw,
+  Droplets,
+  Activity
 } from "lucide-react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, ReferenceLine, CartesianGrid } from "recharts";
 import { GridProperties, PointDetailsResponse } from "../types/forecast";
@@ -135,62 +137,96 @@ export const RegionInspector: React.FC<RegionInspectorProps> = ({
       </div>
 
       <div className={`flex-1 overflow-y-auto pr-1 mt-2.5 space-y-2.5 font-sans text-xs transition-opacity duration-150 ${isLoading ? "opacity-70 pointer-events-none" : "opacity-100"}`}>
-        {/* Core Metric Banner: FCI & Conformal Bounds */}
+        {/* 1. WHAT IS THE FORECAST? (Raw Forecast Guidance) */}
+        <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-sm">
+          <div className="flex items-center justify-between text-[10px] font-mono pb-1.5 border-b border-slate-800/80">
+            <div className="flex items-center gap-1.5 font-bold text-slate-300">
+              <Droplets className="w-3.5 h-3.5 text-primary" />
+              <span>{isRealMode ? "RAW FORECAST GUIDANCE" : "DETERMINISTIC FORECAST"}</span>
+            </div>
+            <span className="text-slate-500 font-normal">{isRealMode ? "NOAA-GFS 0.25°" : "NCUM-G"}</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mt-2 font-mono">
+            <div className="p-2 bg-slate-900/90 border border-slate-800/80 rounded-sm">
+              <div className="text-slate-400 text-[10px]">{isRealMode ? "GFS PRECIP FORECAST" : "NCUM PRECIP"}</div>
+              <div className="text-base font-black text-white mt-0.5 tracking-tight">
+                {properties.f_precip} <span className="text-xs font-normal text-slate-400">mm/day</span>
+              </div>
+              <div className="text-[9px] text-slate-500 mt-0.5">Model output</div>
+            </div>
+            <div className="p-2 bg-slate-900/90 border border-slate-800/80 rounded-sm">
+              <div className="text-slate-400 text-[10px]">{isRealMode ? "UNCERTAINTY SPREAD" : "ENSEMBLE SPREAD (σ)"}</div>
+              <div className="text-base font-black text-primary mt-0.5 tracking-tight">
+                &plusmn;{properties.ensemble_spread} <span className="text-xs font-normal text-slate-400">mm</span>
+              </div>
+              <div className="text-[9px] text-slate-500 mt-0.5">{isRealMode ? "Interval width proxy" : "NEPS-G variance"}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 2 & 3. HOW RELIABLE IS IT? & WHAT IS THE BUST RISK? (Primary Reliability Assessment) */}
         <div className={`p-3 rounded-sm border ${fciTier.bg}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <Gauge className={`w-4 h-4 ${fciTier.color}`} />
-              <span className="font-mono font-bold text-[11px] tracking-wide text-slate-300">
-                FORECAST CONFIDENCE INDICATOR
+              <span className="font-mono font-bold text-[11px] tracking-wide text-slate-200">
+                FORECAST RELIABILITY ASSESSMENT
               </span>
             </div>
-            <span className={`font-mono text-[10px] font-bold px-1.5 py-0.5 rounded-sm uppercase ${fciTier.color} bg-slate-950/60 border border-current`}>
+            <span className={`font-mono text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-sm uppercase ${fciTier.color} bg-slate-950/80 border border-current shadow-sm`}>
               {fciTier.label}
             </span>
           </div>
 
-          <div className="flex items-baseline gap-2 mt-1.5">
-            <span className={`font-mono text-2xl font-black ${fciTier.color}`}>
-              {fci.toFixed(1)}
-            </span>
-            <span className="font-mono text-slate-400 text-xs">/ 100</span>
-            <span className="ml-auto font-mono text-xs text-slate-300">
-              {isRealMode ? "Bust Risk: " : "Bust Prob: "}
-              <strong className={isHighRisk ? "text-critical" : "text-slate-200"}>
-                {(bustProb * 100).toFixed(0)}%
-              </strong>
-            </span>
-          </div>
-
-          {/* Conformal Bounds */}
-          <div className="mt-2 pt-2 border-t border-slate-700/40 font-mono text-[11px]">
-            <div className="text-slate-400 flex items-center justify-between">
-              <span>{isRealMode ? "80% CONFORMAL ERROR BOUND (Split Conformal):" : "80% CONFORMAL ERROR BOUND (CQR):"}</span>
-              <span className="text-amber-300 font-bold">{properties.cqr_bounds}</span>
+          <div className="grid grid-cols-2 gap-3 mt-2.5 pt-2 border-t border-slate-700/30">
+            <div>
+              <div className="text-[10px] font-mono text-slate-400 font-medium">FORECAST CONFIDENCE (FCI)</div>
+              <div className="flex items-baseline gap-1 mt-0.5">
+                <span className={`font-mono text-2xl font-black ${fciTier.color}`}>
+                  {fci.toFixed(1)}
+                </span>
+                <span className="font-mono text-slate-400 text-xs">/ 100</span>
+              </div>
+              <div className="text-[9px] text-slate-400 mt-0.5">Conformal-calibrated index</div>
             </div>
-            <div className="mt-0.5 text-[10px] text-slate-400 leading-tight">
-              {isRealMode
-                ? `Coverage under exchangeability: forecast GFS (${properties.f_precip} mm) is expected to diverge by +${properties.cqr_lower}mm to +${properties.cqr_upper}mm.`
-                : `Coverage guarantee: deterministic NCUM (${properties.f_precip} mm) is expected to diverge by +${properties.cqr_lower}mm to +${properties.cqr_upper}mm.`}
+
+            <div>
+              <div className="text-[10px] font-mono text-slate-400 font-medium">
+                {isRealMode ? "BUST RISK PROBABILITY" : "BUST PROBABILITY"}
+              </div>
+              <div className="flex items-baseline gap-1.5 mt-0.5">
+                <span className={`font-mono text-2xl font-black ${isHighRisk ? "text-critical" : "text-emerald-400"}`}>
+                  {(bustProb * 100).toFixed(0)}%
+                </span>
+                <span className={`text-[10px] font-mono font-bold px-1 py-0.2 rounded ${isHighRisk ? "bg-rose-500/20 text-rose-300" : "bg-emerald-500/20 text-emerald-300"}`}>
+                  {isHighRisk ? "ELEVATED" : "CONTROLLED"}
+                </span>
+              </div>
+              <div className="text-[9px] text-slate-400 mt-0.5">Error &gt; 20mm threshold</div>
             </div>
           </div>
         </div>
 
-        {/* Deterministic Forecast vs Conformal Expectation */}
-        <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
-          <div className="p-2 bg-slate-950/70 border border-slate-800 rounded-sm">
-            <div className="text-slate-400 text-[10px]">{isRealMode ? "GFS FORECAST PRECIP" : "NCUM RAW PRECIP"}</div>
-            <div className="text-sm font-bold text-slate-200 mt-0.5">{properties.f_precip} mm/day</div>
-            <div className="text-[9px] text-slate-500 mt-0.5">Model output</div>
+        {/* 4. HOW LARGE COULD THE ERROR BE? (80% Conformal Error Bounds) */}
+        <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-sm">
+          <div className="flex items-center justify-between text-[10px] font-mono pb-1.5 border-b border-slate-800/80">
+            <div className="flex items-center gap-1.5 font-bold text-slate-300">
+              <Activity className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isRealMode ? "80% CONFORMAL ERROR BOUND" : "80% CONFORMAL BOUND (CQR)"}</span>
+            </div>
+            <span className="text-amber-300 font-mono font-bold text-xs bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/30">
+              {properties.cqr_bounds}
+            </span>
           </div>
-          <div className="p-2 bg-slate-950/70 border border-slate-800 rounded-sm">
-            <div className="text-slate-400 text-[10px]">{isRealMode ? "UNCERTAINTY SPREAD" : "ENSEMBLE SPREAD (σ)"}</div>
-            <div className="text-sm font-bold text-primary mt-0.5">&plusmn;{properties.ensemble_spread} mm</div>
-            <div className="text-[9px] text-slate-500 mt-0.5">{isRealMode ? "Interval-width proxy" : "NEPS-G variance"}</div>
+          <div className="mt-2 text-[10px] text-slate-300 leading-relaxed font-sans bg-slate-900/60 p-2 rounded border border-slate-800/60">
+            {isRealMode
+              ? `Guaranteed 80% finite-sample coverage: GFS deterministic forecast (${properties.f_precip} mm) is calibrated to cover true IMD precipitation within +${properties.cqr_lower} mm to +${properties.cqr_upper} mm.`
+              : `Coverage guarantee: deterministic NCUM (${properties.f_precip} mm) is expected to diverge by +${properties.cqr_lower}mm to +${properties.cqr_upper}mm.`}
           </div>
         </div>
 
-        {/* TreeSHAP Driver Matrix */}
+        {/* 5. WHY IS THE MODEL UNCERTAIN? (TreeSHAP Driver Matrix & Diagnostics) */}
         <div className="p-2.5 bg-slate-950/80 border border-slate-800 rounded-sm">
           <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-slate-300 pb-1.5 border-b border-slate-800/80">
             <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
